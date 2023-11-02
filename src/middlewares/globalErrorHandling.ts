@@ -26,3 +26,29 @@ export function UnauthorizedAccess(req: Request, res: Response, next: NextFuncti
     }
 }
 
+export function FailedLoginAttempt(req: Request, res: Response, next: NextFunction){
+    return () => {
+        let statusCode = HttpStatus.UNAUTHORIZED
+        let error = "Incorrect email and/or password"
+        return res.status(statusCode).send({error})
+    }
+}
+
+export function AccountAlreadyExists(req: Request, res: Response, next: NextFunction){
+    return () => {
+        let statusCode = HttpStatus.CONFLICT
+        let error = "Account with this email already exists"
+        return res.status(statusCode).send({error})
+    }
+}
+
+
+export function ServerError(req: Request, res: Response, next: NextFunction){
+    return () => {
+        let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
+        let error = "Server error. Please try again later"
+        return res.status(statusCode).send({error})
+    }
+}
+
+
