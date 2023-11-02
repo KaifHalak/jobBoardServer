@@ -1,0 +1,53 @@
+// https://www.totaltypescript.com/tsconfig-cheat-sheet
+// https://github.com/XenZi/rilb
+// https://gist.github.com/mtimbs/0eaf27df08cff8f4ca4303de60bf617b
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "verbatimModuleSyntax": false,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+
+    /* If transpiling with TypeScript: */
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    // "rootDir": "./src",
+    "outDir": "./dist",
+
+    "lib": ["es2022"],
+    "noEmitOnError": true,
+
+    // Others
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strictPropertyInitialization": false,             /* Check for class properties that are declared but not set in the constructor. */
+    
+    // Strict Checks
+    "alwaysStrict": true, // Ensures that your files are parsed in the ECMAScript strict mode, and emit “use strict” for each source file.
+    "allowUnreachableCode": false, // pick up dead code paths
+    "noImplicitAny": true, // In some cases where no type annotations are present, TypeScript will fall back to a type of any for a variable when it cannot infer the type.
+    "strictNullChecks": true, // When strictNullChecks is true, null and undefined have their own distinct types and you’ll get a type error if you try to use them where a concrete value is expected.
+
+	// "experimentalDecorators": true,
+	//  "target": "ES6" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+
+  // File structure when compiling to JS
+  "baseUrl": ".",
+  "paths": {
+    "@controllers/*": ["src/controllers/*"],
+    "@middlewares/*": ["src/middlewares/*"],
+    "@routes/*": ["src/routes/*"],
+    "@utils/*": ["src/utils/*"]
+  }
+
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
