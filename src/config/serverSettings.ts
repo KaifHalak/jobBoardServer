@@ -7,9 +7,9 @@ import path from "path"
 
 const app = express();
 const server = http.createServer(app);
-// app.set('view engine', 'ejs');
-// app.set('views', path.join(__dirname, "../", "../", "../", "client", "src"));
-app.use(express.static("C:/Users/usman/Desktop/Job Board/client/public"))
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, "../", "../", "../", "client", "src"));
+app.use(express.static(path.join(__dirname, "../", "../", "../", "client", "public")))
 app.use(express.json())
 app.use(cors())
 app.use(cookieParser())
