@@ -1,8 +1,12 @@
 import jwt from "jsonwebtoken"
 
 export namespace interfaceJWT{
+    
+    interface payload{
+        userId?: string
+    }
 
-    interface payload extends jwt.JwtPayload{
+    interface extendedPayload extends jwt.JwtPayload{
         userId?: string
     }
 

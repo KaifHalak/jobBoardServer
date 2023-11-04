@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express"
 export function MissingParameters(req: Request, res: Response, next: NextFunction){
     return (...params: any[]) => {
         let statusCode = HttpStatus.BAD_REQUEST
-        let error = params.map( (eachParam) => `'${eachParam }'`).join(" and/or ") + " missing from the body"
+        let error = params.map( (eachParam) => `'${eachParam }'`).join(" and/or ") + " missing"
         return res.status(statusCode).send({error})
     }
 }
@@ -29,7 +29,7 @@ export function UnauthorizedAccess(req: Request, res: Response, next: NextFuncti
 export function FailedLoginAttempt(req: Request, res: Response, next: NextFunction){
     return () => {
         let statusCode = HttpStatus.UNAUTHORIZED
-        let error = "Incorrect email and/or password"
+        let error = "Incorrect email and password"
         return res.status(statusCode).send({error})
     }
 }

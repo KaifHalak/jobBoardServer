@@ -3,18 +3,16 @@ import path from "path"
 
 let router = express.Router()
 
-import { Login, SignUp } from "@controllers/userAuthController";
-router.post("/login", Login)
-router.post("/signup",SignUp)
+import { PostLogin, PostSignUp } from "@controllers/postUserAuthController";
+router.post("/login", PostLogin)
+router.post("/signup",PostSignUp)
 
-const loginPage = path.join(__dirname, "../", "../", "../", "client", "public", "loginUI", "index.html")
-const signupPage = path.join(__dirname, "../", "../", "../", "client", "public", "signupUI", "index.html")
+// If user has a valid JWT token, redirect them to the main page
+import { VerifyJWTToken } from "@middlewares/verifyJWTToken";
+router.use("/", VerifyJWTToken)
 
-router.get("/login", (req, res, next) => {
-    res.sendFile(loginPage)
-})
-router.get("/signup", (req, res, next) => {
-    res.sendFile(signupPage)
-})
+import { GetLogin, GetSignup } from "@controllers/getUserAuthController";
+router.get("/login", GetLogin)
+router.get("/signup", GetSignup)
 
 export default router
