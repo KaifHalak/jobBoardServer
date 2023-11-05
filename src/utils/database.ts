@@ -69,7 +69,7 @@ class Database{
     }
 
     
-    async UpdateUserEmail(username: string, userId: string){
+    async UpdateUserUsername(username: string, userId: string){
         try {
             let query = `UPDATE users SET username = '${username}' WHERE userId = '${userId}'`
             let results = await this.query(query)
@@ -80,6 +80,31 @@ class Database{
         }
     }
 
+
+    async UpdateUserEmail(email: string, userId: string, password: string){
+        try {
+            let query = `UPDATE users SET email = '${email}' WHERE userId = '${userId}' AND password = '${password}'`
+            let results = await this.query(query)
+            return results.changedRows // either 0 (failed )or 1 (successful)
+
+        } catch (error) {
+            console.log("Error updating user email", error)
+            throw Error("Database Error!")
+        }
+    }
+
+    async UpdateUserPassword(currentPassword: string, newPassword: string ,userId: string){
+        try {
+            let query = `UPDATE users SET password = '${newPassword}' WHERE userId = '${userId}' AND password = '${currentPassword}'`
+            let results = await this.query(query)
+            return results.changedRows // either 0 (failed )or 1 (successful)
+
+        } catch (error) {
+            console.log("Error updating user email", error)
+            throw Error("Database Error!")
+        }
+    }
+    
 
 }
 

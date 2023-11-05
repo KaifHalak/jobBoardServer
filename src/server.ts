@@ -12,6 +12,7 @@ app.use("/settings", Settings)
 // Default route
 
 const defaultPage = path.join(__dirname, "../", "../", "client", "public", "mainUI", "index.html")
+
     
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
     res.sendFile(defaultPage)

@@ -23,7 +23,7 @@ export async function PostUpdateUsername(req: Request, res: Response, next: Next
             return IncorrectParameters(req, res, next)("'newUsername missing from the body.'")
         }
 
-        await db.UpdateUserEmail(newUsername, userId!)
+        await db.UpdateUserUsername(newUsername, userId!)
 
         return res.send({status: "Username updated successfully"})
 
