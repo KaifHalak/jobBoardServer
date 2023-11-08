@@ -1,6 +1,7 @@
 import mysql from "mysql2"
 import env from "./env"
 import util from "util"
+import { JobDetails } from "@utils/types/jobsTypes";
 
 
 
@@ -104,7 +105,23 @@ class Database{
             throw Error("Database Error!")
         }
     }
-    
+
+
+    // Jobs
+
+    async CreateJob(paylaod: JobDetails, userId: string){
+        try {
+            let query = `INSERT INTO jobs (jobTitle, country, city, aboutCompany, companyName, jobRequirements, jobDescription, views, experience, userId, type, lowerBoundMonthlyCompensation$, upperBoundMonthlyCompensation$,
+                phone, email, linkedin, website, applicationDeadline)
+            VALUES ('${paylaod.jobTitle}', '${paylaod.country}', '${paylaod.city}', '${paylaod.aboutCompany}', '${paylaod.companyName}', '${paylaod.jobReq}', '${paylaod.jobDesc}', '0', '${paylaod.experienceNeeded}', '${userId}', '${paylaod.employmentType}', '${paylaod.minMonthlyCompen}', '${paylaod.maxMonthlyCompen}', '${paylaod.phoneNum}', '${paylaod.email}', '${paylaod.linkedin}', '${paylaod.website}', '${paylaod.applicationDeadline}')`
+
+            let results = await this.query(query)
+            return true
+        } catch (error) {
+            console.log("Error inserting new job post into DB:", error)
+            throw Error("Database error")
+        }
+    }    
 
 }
 

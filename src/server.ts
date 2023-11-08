@@ -9,6 +9,9 @@ app.use("/user", User)
 import Settings from "@routes/settings.routes"
 app.use("/settings", Settings)
 
+import Jobs from "@routes/jobs.routes"
+app.use("/jobs", Jobs)
+
 // Default route
 
 const defaultPage = path.join(__dirname, "../", "../", "client", "public", "mainUI", "index.html")
