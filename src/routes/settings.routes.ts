@@ -3,18 +3,15 @@ import path from "path"
 
 let router = express.Router()
 
-import { PostUpdateUsername } from "@controllers/postUpdateUsernameController"
-router.post("/update-username", PostUpdateUsername)
+import { GETSettings, POSTUpdateEmail, POSTUpdatePassword, POSTUpdateUsername} from "@controllers/settings"
 
-import { PostUpdateEmail } from "@controllers/postUpdateEmailController"
-router.post("/update-email", PostUpdateEmail)
+router.get("/", GETSettings)
 
-import { PostUpdatePassword } from "@controllers/postUpdatePassword"
-router.post("/update-password", PostUpdatePassword)
+router.post("/update-username", POSTUpdateUsername)
 
-import { GetSettings } from "@controllers/getSettingsController"
-router.get("/", GetSettings)
+router.post("/update-email", POSTUpdateEmail)
 
+router.post("/update-password", POSTUpdatePassword)
 
 
 export default router

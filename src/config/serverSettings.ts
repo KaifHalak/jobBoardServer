@@ -5,11 +5,15 @@ import cookieParser from "cookie-parser"
 import env from "../utils/env"
 import path from "path"
 
+const EJS_PATH = path.join(__dirname, "../", "../", "../", "client", "src")
+const STATIC_FILES_PATH = express.static(path.join(__dirname, "../", "../", "../", "client", "public"))
+
 const app = express();
 const server = http.createServer(app);
+
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, "../", "../", "../", "client", "src"));
-app.use(express.static(path.join(__dirname, "../", "../", "../", "client", "public")))
+app.set('views', EJS_PATH);
+app.use(STATIC_FILES_PATH)
 app.use(express.json())
 app.use(cors())
 app.use(cookieParser())

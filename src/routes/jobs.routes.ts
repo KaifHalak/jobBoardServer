@@ -1,12 +1,9 @@
 import express from "express"
-import path from "path"
 
 let router = express.Router()
 
-import { GetJobPost } from "@controllers/getJobPostController"
-router.get("/post", GetJobPost)
-
-import { PostJobPost } from "@controllers/postJobPostController"
-router.post("/post", PostJobPost)
+import { GETCreateJobPostPage, POSTCreateJobPost } from "@controllers/createJobPost"
+router.get("/create", GETCreateJobPostPage)
+router.post("/create", POSTCreateJobPost)
 
 export default router

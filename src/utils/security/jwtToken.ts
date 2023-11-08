@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken"
 import env from "../env"
-import { interfaceJWT } from "../types/jwtTypes"
+import { interfaceJWT } from "../types/authTypes"
 
-export function CreateToken(payload: interfaceJWT.payload){
-    let token = jwt.sign(payload, env("JWT_SECRET")!, { expiresIn: `${eval(env("COOKIE_MAX_AGE")!) }ms`})
+export function CreateToken(userId: string){
+    let token = jwt.sign({ userId }, env("JWT_SECRET")!, { expiresIn: `50m`})
     return token
 }
 
