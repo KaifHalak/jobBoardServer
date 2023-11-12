@@ -68,7 +68,6 @@ class Database{
             throw Error("Database Error!")
         }
     }
-
     
     async UpdateUserUsername(username: string, userId: string){
         try {
@@ -80,7 +79,6 @@ class Database{
             throw Error("Database Error!")
         }
     }
-
 
     async UpdateUserEmail(email: string, userId: string, password: string){
         try {
@@ -122,6 +120,30 @@ class Database{
             throw Error("Database error")
         }
     }    
+
+    async GetSavedJobs(userId: string){
+        try {
+            // let query = `SELECT jobTitle, country, city, type, companyName, jobRequirements, jobDescription, experience FROM userSavedJobs WHERE userId = ${userId}`
+            let query = `SELECT * FROM userSavedJobs WHERE userId = ${userId}`
+
+            let results = await this.query(query)
+            return results
+        } catch (error) {
+            console.log("Error getting saved jobs from DB", error)
+            throw Error("Database error")
+        }
+    }  
+    
+    async GetJob(jobId: string){
+        try {
+            let query = `SELECT * FROM jobs WHERE jobId = ${jobId}`
+            let results = await this.query(query)
+            return results[0]
+        } catch (error) {
+            console.log("Error getting saved jobs from DB", error)
+            throw Error("Database error")
+        }
+    }
 
 }
 

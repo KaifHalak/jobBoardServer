@@ -1,13 +1,9 @@
 import app from "./config/serverSettings";
-import path from "path"
-import { Request, Response, NextFunction } from "express"
 
-// Default route
 
-const defaultPage = path.join(__dirname, "../", "../", "client", "public", "mainUI", "index.html")
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
-    res.sendFile(defaultPage)
-})
+
+import MainPage from "@controllers/mainPage";
+app.get("/", MainPage)
 
 import User from "@routes/user.routes"
 app.use("/user", User)
@@ -20,4 +16,5 @@ app.use("/settings", Settings)
 
 import Jobs from "@routes/jobs.routes"
 app.use("/jobs", Jobs)
+
 
