@@ -6,11 +6,14 @@ import { GETCreateJobPostPage, POSTCreateJobPost } from "@controllers/createJobP
 router.get("/create", GETCreateJobPostPage)
 router.post("/create", POSTCreateJobPost)
 
-import { GETSavedJobsPage } from "@controllers/savedJobs";
+import { GETSavedJobsPage, POSTSaveJob, POSTUnSaveJob } from "@controllers/savedJobs";
 router.get("/saved", GETSavedJobsPage)
+router.post("/save", POSTSaveJob)
+router.post("/unsave", POSTUnSaveJob)
 
 import GETViewJobs from "@controllers/viewJobs"
 router.get("/:id", GETViewJobs)
+
 
 
 

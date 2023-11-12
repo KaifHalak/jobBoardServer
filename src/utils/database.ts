@@ -145,6 +145,52 @@ class Database{
         }
     }
 
+    async GetAllJobs(){
+        try {
+            let query = `SELECT * FROM jobs`
+            let results = await this.query(query)
+            return results
+        } catch (error) {
+            console.log("Error getting all jobs from DB", error)
+            throw Error("Database error")
+        }
+    }
+
+    async GetAllSavedJobIds(userId: string){
+        try {
+            let query = `SELECT jobId FROM savedJobs WHERE userId = ${userId}`
+            let results = await this.query(query)
+            let formattedResults = results.map((object: any ) => object.jobId)
+            return formattedResults
+        } catch (error) {
+            console.log("Error getting all saved jobs ids from DB", error)
+            throw Error("Database error")
+        }
+    }
+
+    async SaveJob(userId: string, jobId: string){
+        try {
+            let query = `INSERT INTO savedJobs (userId, jobId) VALUES ('${userId}', '${jobId}')`
+            await this.query(query)
+            return true
+        } catch (error) {
+            console.log("Error saving jobs to db", error)
+            throw Error("Database error")
+        }
+    }
+
+
+    async UnSaveJob(userId: string, jobId: string){
+        try {
+            let query = `DELETE FROM savedJobs WHERE userId = '${userId}' AND jobId = '${jobId}'`
+            await this.query(query)
+            return true
+        } catch (error) {
+            console.log("Error unsaving jobs from DB", error)
+            throw Error("Database error")
+        }
+    }
+
 }
 
 
