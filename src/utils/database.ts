@@ -4,6 +4,15 @@ import util from "util"
 import { JobDetails } from "@utils/types/jobsTypes";
 
 
+interface filters{
+    [key: string] : string | undefined;
+    role?: string,
+    country?: string,
+    city?: string,
+    experience?: string,
+    type?: string
+}
+
 
 class Database{
     private pool: mysql.Pool
@@ -145,9 +154,31 @@ class Database{
         }
     }
 
-    async GetAllJobs(){
+    async GetAllJobs(filters: filters){
         try {
-            let query = `SELECT * FROM jobs`
+
+            let queryFilters = ""
+
+            for (let key in filters){
+
+                switch (key) {
+                    case "experience":
+                        queryFilters += `${key} < ${filters[key]} AND `
+                        break;
+                
+                    default:
+                        queryFilters += `${key} = '${filters[key]}' AND `
+                        break;
+                }
+
+            }
+            queryFilters = queryFilters.slice(0, -5)
+
+            if (queryFilters){
+                queryFilters = `WHERE ${queryFilters}`
+            }
+
+            let query = `SELECT * FROM jobs ${queryFilters}`
             let results = await this.query(query)
             return results
         } catch (error) {
