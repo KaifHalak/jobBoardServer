@@ -166,6 +166,10 @@ class Database{
                         queryFilters += `${key} < ${filters[key]} AND `
                         break;
                 
+                    case "search":
+                        queryFilters += `jobTitle LIKE '%${filters[key]}%' OR jobRequirements LIKE '%${filters[key]}%' AND `
+                        break;
+
                     default:
                         queryFilters += `${key} = '${filters[key]}' AND `
                         break;
