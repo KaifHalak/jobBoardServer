@@ -73,7 +73,7 @@ class Database{
             let results = await this.query(query)
             return results[0] || null
         } catch (error) {
-            console.log("Error getting user email", error)
+            console.log("Error getting username and email", error)
             throw Error("Database Error!")
         }
     }
@@ -81,10 +81,10 @@ class Database{
     async UpdateUserUsername(username: string, userId: string){
         try {
             let query = `UPDATE users SET username = '${username}' WHERE userId = '${userId}'`
-            let results = await this.query(query)
+            await this.query(query)
             return true
         } catch (error) {
-            console.log("Error updating user email", error)
+            console.log("Error updating username", error)
             throw Error("Database Error!")
         }
     }
@@ -96,7 +96,7 @@ class Database{
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
-            console.log("Error updating user email", error)
+            console.log("Error updating email", error)
             throw Error("Database Error!")
         }
     }
@@ -108,7 +108,7 @@ class Database{
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
-            console.log("Error updating user email", error)
+            console.log("Error updating password", error)
             throw Error("Database Error!")
         }
     }
@@ -122,19 +122,17 @@ class Database{
                 phone, email, linkedin, website, applicationDeadline)
             VALUES ('${paylaod.jobTitle}', '${paylaod.country}', '${paylaod.city}', '${paylaod.aboutCompany}', '${paylaod.companyName}', '${paylaod.jobReq}', '${paylaod.jobDesc}', '0', '${paylaod.experienceNeeded}', '${userId}', '${paylaod.employmentType}', '${paylaod.minMonthlyCompen}', '${paylaod.maxMonthlyCompen}', '${paylaod.phoneNum}', '${paylaod.email}', '${paylaod.linkedin}', '${paylaod.website}', '${paylaod.applicationDeadline}')`
 
-            let results = await this.query(query)
+            await this.query(query)
             return true
         } catch (error) {
-            console.log("Error inserting new job post into DB:", error)
+            console.log("Error creating new job post:", error)
             throw Error("Database error")
         }
     }    
 
     async GetSavedJobs(userId: string){
         try {
-            // let query = `SELECT jobTitle, country, city, type, companyName, jobRequirements, jobDescription, experience FROM userSavedJobs WHERE userId = ${userId}`
             let query = `SELECT * FROM userSavedJobs WHERE userId = ${userId}`
-
             let results = await this.query(query)
             return results
         } catch (error) {
@@ -149,7 +147,7 @@ class Database{
             let results = await this.query(query)
             return results[0]
         } catch (error) {
-            console.log("Error getting saved jobs from DB", error)
+            console.log("Error getting a job from DB", error)
             throw Error("Database error")
         }
     }
@@ -186,7 +184,7 @@ class Database{
             let results = await this.query(query)
             return results
         } catch (error) {
-            console.log("Error getting all jobs from DB", error)
+            console.log("Error getting all jobs with filters from DB", error)
             throw Error("Database error")
         }
     }
@@ -209,11 +207,10 @@ class Database{
             await this.query(query)
             return true
         } catch (error) {
-            console.log("Error saving jobs to db", error)
+            console.log("Error saving job to db", error)
             throw Error("Database error")
         }
     }
-
 
     async UnSaveJob(userId: string, jobId: string){
         try {
@@ -221,7 +218,7 @@ class Database{
             await this.query(query)
             return true
         } catch (error) {
-            console.log("Error unsaving jobs from DB", error)
+            console.log("Error unsaving job from DB", error)
             throw Error("Database error")
         }
     }

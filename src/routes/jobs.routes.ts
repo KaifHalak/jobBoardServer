@@ -11,10 +11,8 @@ router.get("/saved", GETSavedJobsPage)
 router.post("/save", POSTSaveJob)
 router.post("/unsave", POSTUnSaveJob)
 
-import GETViewJobs from "@controllers/viewJobs"
-router.get("/:id", GETViewJobs)
-
-
+import GETViewJob from "@controllers/viewJobs"
+router.get("/:id", GETViewJob)
 
 
 export default router

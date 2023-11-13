@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express"
+import { Response, NextFunction } from "express"
 
-import { CustomError, ServerError } from "@middlewares/globalErrorHandling";
+import { ServerError } from "@middlewares/globalErrorHandling";
 
 import { interfaceExpress } from "@utils/types/authTypes";
 
@@ -26,6 +26,7 @@ export default async function MainPage(req: interfaceExpress.customRequest, res:
     try {
         let filters = req.query as filters
 
+        // Remove empty filters
         Object.keys(filters).forEach((key) => {
             if (!filters[key]){
                 delete filters[key]
@@ -34,8 +35,11 @@ export default async function MainPage(req: interfaceExpress.customRequest, res:
 
         let userId = req.userId!
         let allJobs = await db.GetAllJobs(filters)
+
+                // To allow users to see which jobs they have already saved on the main page (if logged in)
         let allSavedJobIds = []
         
+        // If the user is logged in
         if (userId){
             allSavedJobIds = await db.GetAllSavedJobIds(userId)
         }

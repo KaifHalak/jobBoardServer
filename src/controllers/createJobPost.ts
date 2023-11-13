@@ -57,7 +57,7 @@ export async function POSTCreateJobPost(req: interfaceExpress.customRequest, res
         }
 
         // Create job post in DB
-        let results = await db.CreateJob(paylaod, userId)
+        await db.CreateJob(paylaod, userId)
 
         return res.send({status:"Success"})
 

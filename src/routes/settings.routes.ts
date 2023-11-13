@@ -8,9 +8,7 @@ import { GETSettings, POSTUpdateEmail, POSTUpdatePassword, POSTUpdateUsername} f
 router.get("/", GETSettings)
 
 router.post("/update-username", POSTUpdateUsername)
-
 router.post("/update-email", POSTUpdateEmail)
-
 router.post("/update-password", POSTUpdatePassword)
 
 

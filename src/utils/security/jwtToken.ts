@@ -3,7 +3,7 @@ import env from "../env"
 import { interfaceJWT } from "../types/authTypes"
 
 export function CreateToken(userId: string){
-    let token = jwt.sign({ userId }, env("JWT_SECRET")!, { expiresIn: `50m`})
+    let token = jwt.sign({ userId }, env("JWT_SECRET")!, { expiresIn: `${eval(env("COOKIE_MAX_AGE")!)}`})
     return token
 }
 

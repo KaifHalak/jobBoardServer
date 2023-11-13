@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express"
+import { Response, NextFunction } from "express"
 
 import { interfaceExpress } from "@utils/types/authTypes"
 
@@ -20,6 +20,8 @@ export async function GETSettings(req: interfaceExpress.customRequest, res: Resp
 
     return res.render(settingsPage,{username, email})
 }
+
+
 
 export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
     
