@@ -10,7 +10,8 @@ interface filters{
     country?: string,
     city?: string,
     experience?: string,
-    type?: string
+    type?: string,
+    offset?: string
 }
 
 
@@ -156,7 +157,7 @@ class Database{
         try {
 
             let queryFilters = ""
-
+            let offset: string = "0"
             for (let key in filters){
 
                 switch (key) {
@@ -166,6 +167,10 @@ class Database{
                 
                     case "search":
                         queryFilters += `jobTitle LIKE '%${filters[key]}%' OR jobRequirements LIKE '%${filters[key]}%' AND `
+                        break;
+
+                    case "offset":
+                        offset = filters[key]!
                         break;
 
                     default:
@@ -179,6 +184,8 @@ class Database{
             if (queryFilters){
                 queryFilters = `WHERE ${queryFilters}`
             }
+
+            queryFilters += `LIMIT 9 OFFSET ${offset}`
 
             let query = `SELECT * FROM jobs ${queryFilters}`
             let results = await this.query(query)

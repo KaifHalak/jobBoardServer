@@ -19,10 +19,11 @@ interface filters{
     country?: string,
     city?: string,
     experience?: string,
-    type?: string
+    type?: string,
+    offset?: string
 }
 
-export default async function MainPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function MainPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
     try {
         let filters = req.query as filters
 
@@ -36,7 +37,7 @@ export default async function MainPage(req: interfaceExpress.customRequest, res:
         let userId = req.userId!
         let allJobs = await db.GetAllJobs(filters)
 
-                // To allow users to see which jobs they have already saved on the main page (if logged in)
+        // To allow users to see which jobs they have already saved on the main page (if logged in)
         let allSavedJobIds = []
         
         // If the user is logged in
@@ -47,6 +48,30 @@ export default async function MainPage(req: interfaceExpress.customRequest, res:
 
     } catch (error) {
         console.log("Error sending user the main page:", error)
+        ServerError(req, res, next)()
+    }
+}
+
+
+export async function POSTMoreJobs(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+    try {
+        
+        let filters = req.query as filters
+        let userId = req.userId!
+        let allJobs = await db.GetAllJobs(filters)
+
+        // To allow users to see which jobs they have already saved on the main page (if logged in)
+        let allSavedJobIds = []
+        
+        // If the user is logged in
+        if (userId){
+            allSavedJobIds = await db.GetAllSavedJobIds(userId)
+        }
+        
+        return res.send({status: {allJobs, allSavedJobIds}})
+
+    } catch (error) {
+        console.log("error getting more jobs:", error)
         ServerError(req, res, next)()
     }
 }
