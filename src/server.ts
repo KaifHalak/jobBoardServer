@@ -1,7 +1,5 @@
 import app from "./config/serverSettings";
 
-
-
 import { MainPage,  POSTMoreJobs } from "@controllers/mainPage";
 app.get("/", MainPage)
 app.post("/", POSTMoreJobs)

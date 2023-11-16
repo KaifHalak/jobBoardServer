@@ -40,11 +40,15 @@ export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: 
             return CustomError(req, res, next)("'passsword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
+        if (!(ValidatePassword(password))){
+            return CustomError(req, res, next)("Pass must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
+        }
+
         if (!ValidateEmail(newEmail)){
             return CustomError(req, res, next)("Incorrect email format", HttpStatusCodes.BAD_REQUEST)
         }
 
-        let result = await db.UpdateUserEmail(newEmail, userId!, password)
+        let result = await db.UpdateUserEmail(newEmail, userId, password)
 
         if (!result){
             return CustomError(req, res, next)("Incorrect password", HttpStatusCodes.UNAUTHORIZED)
@@ -83,7 +87,7 @@ export async function POSTUpdatePassword(req: interfaceExpress.customRequest, re
             return CustomError(req, res, next)("Password must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
         }
 
-        let result = await db.UpdateUserPassword(currentPassword, newPassword, userId!)
+        let result = await db.UpdateUserPassword(currentPassword, newPassword, userId)
 
         if (!result){
             return CustomError(req, res, next)("Incorrect password", HttpStatusCodes.UNAUTHORIZED)
@@ -108,8 +112,9 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
         let userId = req.userId!
         let { newUsername } = req.body
 
-        if (!newUsername){
-            return CustomError(req, res, next)("'newUsername missing from the body.'", HttpStatusCodes.BAD_REQUEST)
+        let result = ValidateUsername(newUsername)
+        if (result?.error){
+            return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         await db.UpdateUserUsername(newUsername, userId!)
@@ -135,4 +140,20 @@ function ValidateEmail(email: string){
 
 function ValidatePassword(password: string){
     return (password.length >= 6)
+}
+
+function ValidateUsername(username: string){
+
+    let allowedPatterns = /^[a-zA-Z0-9_]+$/
+
+    if ( !(username.length >= 3 && username.length <= 20) ){
+        return {error : "Username must be between 3 and 20 characters"}
+    }
+
+    if ( !(allowedPatterns.test(username)) ){
+        return {error: "Only characters from A-Z, a-z, numbers, and underscores are allowed."}
+    }
+
+    return
+
 }

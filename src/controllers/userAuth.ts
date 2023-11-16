@@ -57,15 +57,16 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
 
     // Validation
 
-    if (!username){
-        return CustomError(req, res, next)("Username must have a value", HttpStatusCodes.BAD_REQUEST)
+    let result = ValidateUsername(username)
+    if (result?.error){
+        return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
     }
 
     if (!ValidateEmail(email)){
         return CustomError(req, res, next)("Invalid email format", HttpStatusCodes.BAD_REQUEST)
     }
 
-    if ( !ValidatePassword(password)){
+    if (!ValidatePassword(password)){
         return CustomError(req, res, next)(`Password must be atleast 6 characters long`,HttpStatusCodes.BAD_REQUEST)
     }
 
@@ -112,6 +113,22 @@ function ValidatePassword(password: string){
         return true
     }
     return false
+}
+
+function ValidateUsername(username: string){
+
+    let allowedPatterns = /^[a-zA-Z0-9_]+$/
+
+    if ( !(username.length >= 3 && username.length <= 20) ){
+        return {error : "Username must be between 3 and 20 characters"}
+    }
+
+    if ( !(allowedPatterns.test(username)) ){
+        return {error: "Only characters from A-Z, a-z, numbers, and underscores are allowed."}
+    }
+
+    return
+
 }
 
 function AddCookie(res: Response, token: string){

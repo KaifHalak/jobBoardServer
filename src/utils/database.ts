@@ -34,8 +34,8 @@ class Database{
 
     async SignupUser(email: string, password: string, username: string){
         try {
-            let query = `INSERT INTO users (email, password, username) VALUES ('${email}', '${password}', '${username}')`
-            let results = await this.query(query)
+            let query = `INSERT INTO users (email, password, username) VALUES (?, ?, ?)`
+            let results = await this.query(query, [email, password, username])
             let { insertId } = results
             return insertId 
         } catch (error) {
@@ -46,8 +46,8 @@ class Database{
 
     async LoginUser(email: string, password: string):Promise<string | null>{
         try {
-            let query = `SELECT userId FROM users WHERE email = '${email}' AND password = '${password}' `
-            let result = await this.query(query)
+            let query = `SELECT userId FROM users WHERE email = ? AND password = ? `
+            let result = await this.query(query, [email, password])
             let userId  = result[0]?.userId || null
             return userId
         } catch (error) {
@@ -58,8 +58,8 @@ class Database{
 
     async CheckIfUserExists(email: string) : Promise<string | null>{
         try {
-            let query = `SELECT userId FROM users WHERE email = '${email}'`
-            let results = await this.query(query)
+            let query = `SELECT userId FROM users WHERE email = ?`
+            let results = await this.query(query, [email])
             let userId = results[0]?.userId || null
             return userId
         } catch (error) {
@@ -70,8 +70,8 @@ class Database{
 
     async GetUserEmailAndUsername( userId: string ){
         try {
-            let query = `SELECT email, username FROM users WHERE userId = '${userId}'`
-            let results = await this.query(query)
+            let query = `SELECT email, username FROM users WHERE userId = ?`
+            let results = await this.query(query,[userId])
             return results[0] || null
         } catch (error) {
             console.log("Error getting username and email", error)
@@ -81,8 +81,8 @@ class Database{
     
     async UpdateUserUsername(username: string, userId: string){
         try {
-            let query = `UPDATE users SET username = '${username}' WHERE userId = '${userId}'`
-            await this.query(query)
+            let query = `UPDATE users SET username = ? WHERE userId = ?`
+            await this.query(query, [username, userId])
             return true
         } catch (error) {
             console.log("Error updating username", error)
@@ -92,8 +92,8 @@ class Database{
 
     async UpdateUserEmail(email: string, userId: string, password: string){
         try {
-            let query = `UPDATE users SET email = '${email}' WHERE userId = '${userId}' AND password = '${password}'`
-            let results = await this.query(query)
+            let query = `UPDATE users SET email = ? WHERE userId = ? AND password = ?`
+            let results = await this.query(query, [email, userId, password])
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
@@ -104,8 +104,8 @@ class Database{
 
     async UpdateUserPassword(currentPassword: string, newPassword: string ,userId: string){
         try {
-            let query = `UPDATE users SET password = '${newPassword}' WHERE userId = '${userId}' AND password = '${currentPassword}'`
-            let results = await this.query(query)
+            let query = `UPDATE users SET password = ? WHERE userId = ? AND password = ?`
+            let results = await this.query(query, [newPassword, userId, currentPassword])
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
@@ -116,25 +116,44 @@ class Database{
 
 
     // Jobs
+    async CreateJob(paylaod: JobDetails, userId: string) {
+    try {
+        const query = `
+        INSERT INTO jobs (jobTitle, country, city, aboutCompany, companyName, jobRequirements, jobDescription, views, experience, userId, type, lowerBoundMonthlyCompensation$, upperBoundMonthlyCompensation$, phone, email, linkedin, website, applicationDeadline)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    async CreateJob(paylaod: JobDetails, userId: string){
-        try {
-            let query = `INSERT INTO jobs (jobTitle, country, city, aboutCompany, companyName, jobRequirements, jobDescription, views, experience, userId, type, lowerBoundMonthlyCompensation$, upperBoundMonthlyCompensation$,
-                phone, email, linkedin, website, applicationDeadline)
-            VALUES ('${paylaod.jobTitle}', '${paylaod.country}', '${paylaod.city}', '${paylaod.aboutCompany}', '${paylaod.companyName}', '${paylaod.jobReq}', '${paylaod.jobDesc}', '0', '${paylaod.experienceNeeded}', '${userId}', '${paylaod.employmentType}', '${paylaod.minMonthlyCompen}', '${paylaod.maxMonthlyCompen}', '${paylaod.phoneNum}', '${paylaod.email}', '${paylaod.linkedin}', '${paylaod.website}', '${paylaod.applicationDeadline}')`
+        const values = [
+        paylaod.jobTitle,
+        paylaod.country,
+        paylaod.city,
+        paylaod.aboutCompany,
+        paylaod.companyName,
+        paylaod.jobReq,
+        paylaod.jobDesc,
+        paylaod.experienceNeeded,
+        userId,
+        paylaod.employmentType,
+        paylaod.minMonthlyCompen,
+        paylaod.maxMonthlyCompen,
+        paylaod.phoneNum,
+        paylaod.email,
+        paylaod.linkedin,
+        paylaod.website,
+        paylaod.applicationDeadline,
+        ];
 
-            await this.query(query)
-            return true
-        } catch (error) {
-            console.log("Error creating new job post:", error)
-            throw Error("Database error")
-        }
-    }    
-
+        await this.query(query, values);
+        return true;
+    } catch (error) {
+        console.log("Error creating new job post:", error);
+        throw new Error("Database error");
+    }
+    }
+  
     async GetSavedJobs(userId: string){
         try {
-            let query = `SELECT * FROM userSavedJobs WHERE userId = ${userId}`
-            let results = await this.query(query)
+            let query = `SELECT jobTitle, type, country, city, companyName, jobDescription, jobRequirements, experience, jobId FROM userSavedJobs WHERE userId = ?`
+            let results = await this.query(query, [userId])
             return results
         } catch (error) {
             console.log("Error getting saved jobs from DB", error)
@@ -144,8 +163,8 @@ class Database{
     
     async GetJob(jobId: string){
         try {
-            let query = `SELECT * FROM jobs WHERE jobId = ${jobId}`
-            let results = await this.query(query)
+            let query = `SELECT * FROM jobs WHERE jobId = ?`
+            let results = await this.query(query,[jobId])
             return results[0]
         } catch (error) {
             console.log("Error getting a job from DB", error)
@@ -153,53 +172,59 @@ class Database{
         }
     }
 
-    async GetAllJobs(filters: filters){
-        try {
+    async GetAllJobs(filters: filters) {
+    try {
+        const filterClauses: string[] = [];
+        const filterValues: (string | number)[] = [];
 
-            let queryFilters = ""
-            let offset: string = "0"
-            for (let key in filters){
+        for (const key in filters) {
+            let value = filters[key]!
+            switch (key) {
+                case "experience":
+                    filterClauses.push(`experience < ?`);
+                    filterValues.push(Number(value));
+                    break;
 
-                switch (key) {
-                    case "experience":
-                        queryFilters += `${key} < ${filters[key]} AND `
-                        break;
-                
-                    case "search":
-                        queryFilters += `jobTitle LIKE '%${filters[key]}%' OR jobRequirements LIKE '%${filters[key]}%' AND `
-                        break;
+                // Look for key words in job title and job requirements
+                case "search":
+                    filterClauses.push(`jobTitle LIKE ? OR jobRequirements LIKE ?`);
+                    filterValues.push(`%${value}%`);
+                    filterValues.push(`%${value}%`);
+                    break;
 
-                    case "offset":
-                        offset = filters[key]!
-                        break;
-
-                    default:
-                        queryFilters += `${key} = '${filters[key]}' AND `
-                        break;
-                }
-
-            }
-            queryFilters = queryFilters.slice(0, -5)
-
-            if (queryFilters){
-                queryFilters = `WHERE ${queryFilters}`
+                case "type":
+                case "country": 
+                case "city":
+                    filterClauses.push(`${key} = ?`);
+                    filterValues.push(value);
+                    break;
             }
 
-            queryFilters += `LIMIT 9 OFFSET ${offset}`
-
-            let query = `SELECT * FROM jobs ${queryFilters}`
-            let results = await this.query(query)
-            return results
-        } catch (error) {
-            console.log("Error getting all jobs with filters from DB", error)
-            throw Error("Database error")
         }
+
+        let query = `SELECT * FROM jobs`;
+
+        if (filterClauses.length > 0) {
+            query += ` WHERE ${filterClauses.join(" AND ")}`;
+        }
+
+        query += ` LIMIT 9 OFFSET ${Number(filters.offset) || 0}`
+        // Execute the query with parameterized values
+        let results = await this.query(query, filterValues);
+
+        return results;
+
+    } catch (error) {
+        console.log("Error getting all jobs with filters from DB", error);
+        throw new Error("Database error");
     }
+
+}
 
     async GetAllSavedJobIds(userId: string){
         try {
-            let query = `SELECT jobId FROM savedJobs WHERE userId = ${userId}`
-            let results = await this.query(query)
+            let query = `SELECT jobId FROM savedJobs WHERE userId = ?`
+            let results = await this.query(query,[userId])
             let formattedResults = results.map((object: any ) => object.jobId)
             return formattedResults
         } catch (error) {
@@ -210,8 +235,8 @@ class Database{
 
     async SaveJob(userId: string, jobId: string){
         try {
-            let query = `INSERT INTO savedJobs (userId, jobId) VALUES ('${userId}', '${jobId}')`
-            await this.query(query)
+            let query = `INSERT INTO savedJobs (userId, jobId) VALUES (?, ?)`
+            await this.query(query, [userId, jobId])
             return true
         } catch (error) {
             console.log("Error saving job to db", error)
@@ -221,8 +246,8 @@ class Database{
 
     async UnSaveJob(userId: string, jobId: string){
         try {
-            let query = `DELETE FROM savedJobs WHERE userId = '${userId}' AND jobId = '${jobId}'`
-            await this.query(query)
+            let query = `DELETE FROM savedJobs WHERE userId = ? AND jobId = ?`
+            await this.query(query,[userId, jobId])
             return true
         } catch (error) {
             console.log("Error unsaving job from DB", error)

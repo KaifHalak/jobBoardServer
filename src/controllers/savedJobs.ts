@@ -13,12 +13,8 @@ export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res:
     try {
         let userId = req.userId!
 
-
-        // To allow users to see which jobs they have already saved on the main page
-        let allSavedJobIds = await db.GetAllSavedJobIds(userId)
-
         let allJobs = await db.GetSavedJobs(userId)
-        return res.render(FILE_PATH, {allJobs, allSavedJobIds})
+        return res.render(FILE_PATH, {allJobs, allSavedJobIds: false})
 
     } catch (error) {
         console.log("Error getting saved jobs:", error)
