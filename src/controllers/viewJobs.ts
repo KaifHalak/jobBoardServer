@@ -19,8 +19,21 @@ export default async function GETViewJob(req: interfaceExpress.customRequest, re
     let userId = req.userId!
     let userIp = req.ip!
     let jobId = req.params.id!
+
     try {
+
+        if (!Number(jobId)){
+            logger.Events("Job id not a number: GETViewJob", {userId, userIp, jobId})
+            return res.send({error:"Incorrect job id"})
+        }
+
         let jobInfo = await db.GetJob(jobId)
+
+        // Job doesnt exist
+        if (!jobInfo){
+            logger.Events("Job does not exist: GETViewJob", {userId, userIp, jobId})
+            return res.send({error: "Job does not exist"})
+        }
 
         logger.Events("GETViewJob successfull", {userId, userIp, jobId})
 

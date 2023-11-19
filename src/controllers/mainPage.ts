@@ -6,6 +6,7 @@ import { interfaceExpress } from "@utils/types/authTypes";
 import { JobTypes, Locations  } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
+import { VerifyToken } from "@utils/security/jwtToken";
 
 
 const FILE_PATH = path.join(__dirname, "../", "../", "../",  "client", "public", "mainUI", "index")
@@ -27,7 +28,8 @@ interface filters{
 
 export async function GETMainPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
     
-    let userId = req.userId!
+    let token = req.cookies["sessionToken"]
+    let userId = VerifyToken(token)?.userId
     let userIp = req.ip!
     let filters: filters = {}
     try {
@@ -74,7 +76,7 @@ export async function POSTGetMoreJobs(req: interfaceExpress.customRequest, res: 
 
 // Helper Functions
 
-async function RetrieveJobData(filters: filters, userId: string){
+async function RetrieveJobData(filters: filters, userId: string | undefined){
      // Remove empty filters
      Object.keys(filters).forEach((key) => {
         let filterKey = key as keyof filters

@@ -38,6 +38,19 @@ export async function POSTSaveJob(req: interfaceExpress.customRequest, res: Resp
 
     try {
 
+        if (!Number(jobId)){
+            logger.Events("Job id not a number: POSTSaveJob")
+            return res.send({error: "Incorrect job id"})
+        }
+
+        // Check if job exists
+        let job = await db.GetJob(jobId)
+
+        if (!job){
+            logger.Events("Job does not exist: POSTSaveJob", {userId, userIp, jobId})
+            return res.send({error: "Job does not exist"})
+        }
+
         await db.SaveJob(userId, jobId)
 
         logger.Events("Job saved successfully: POSTSaveJob", {userId, userIp, jobId})
@@ -63,6 +76,15 @@ export async function POSTUnSaveJob(req: interfaceExpress.customRequest, res: Re
     let jobId = req.body.jobId
 
     try {
+
+        // Check if job exists
+        let job = await db.GetJob(jobId)
+
+        if (!job){
+            logger.Events("Job does not exist: POSTUnSaveJob", {userId, userIp, jobId})
+            return res.send({error: "Job does not exist"})
+        }
+
         await db.UnSaveJob(userId, jobId)
 
         logger.Events("Job unsaved successfully: POSTUnSaveJob", {userId, userIp, jobId})
