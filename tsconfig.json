@@ -44,7 +44,8 @@
     "@controllers/*": ["src/controllers/*"],
     "@middlewares/*": ["src/middlewares/*"],
     "@routes/*": ["src/routes/*"],
-    "@utils/*": ["src/utils/*"]
+    "@utils/*": ["src/utils/*"],
+    "@config/*": ["src/config/*"]
   }
 
   },

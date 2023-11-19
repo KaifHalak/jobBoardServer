@@ -1,20 +1,22 @@
 import { Request, Response, NextFunction } from "express"
+import path from "path"
 
 import { CustomError, ServerError } from "@middlewares/globalErrorHandling";
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
-
 import { JobDetails } from "@utils/types/jobsTypes";
 import { interfaceExpress } from "@utils/types/authTypes";
-
 import { JobTypes, Locations } from "@utils/enums/jobPostDetails";
-
-import path from "path"
 import db from "@utils/database";
+import logger from "@utils/logger/dataLogger";
 
 const FILE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "createJobPostUI", "index")
 
 // Send user the file
-export async function GETCreateJobPostPage(req: Request, res: Response, next: NextFunction){
+export async function GETCreateJobPostPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+    let userIp = req.ip
+    let userId = req.userId
+    logger.Events("GETCreateJobPostPage successfull", {userIp, userId})
+
     let countries = Locations
     res.render(FILE_PATH,{countries})
 }
@@ -22,22 +24,31 @@ export async function GETCreateJobPostPage(req: Request, res: Response, next: Ne
 
 // Create the job post
 export async function POSTCreateJobPost(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+    
+    let userIp = req.ip!
+    let userId = req.userId!
+
     try {
-        let userId = req.userId!
-       let payload: JobDetails =  req.body
-       let validation = ValidatePayload(payload)
+        let payload: JobDetails =  req.body
+        let validation = ValidatePayload(payload)
 
         if (validation?.error){
+            logger.Events("Payload validation failed: POSTCreateJobPost", {userId, userIp})
             return CustomError(req, res, next)(validation.error, HttpStatusCodes.BAD_REQUEST)
         }
     
         // Create job post in DB
         await db.CreateJob(payload, userId)
 
+        logger.Events("Job post created successfully: POSTCreateJobPost", {userId, userIp, payload})
         return res.send({status:"Success"})
 
     } catch (error) {
-        console.log("Error creating job post:", error)
+
+        if (error instanceof Error){
+            error.message = "Error creating job post: POSTCreateJobPost"
+            logger.Error(error, {userId, userIp})
+        }
         ServerError(req, res, next)()
     }
 }
@@ -46,7 +57,6 @@ export async function POSTCreateJobPost(req: interfaceExpress.customRequest, res
 // Helper Functions
 
 function ValidatePayload(payload: JobDetails){
-
     if (
         !payload.country ||
         !payload.city ||
@@ -76,7 +86,7 @@ function ValidatePayload(payload: JobDetails){
 
     // job title
     const lowerJobTitleLen = 5
-    const upperJobTitleLen = 30 
+    const upperJobTitleLen = 50
     
     let jobTitleLen = payload.jobTitle.length
     if ( !(jobTitleLen >= lowerJobTitleLen && jobTitleLen <= upperJobTitleLen) ){

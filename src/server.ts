@@ -1,8 +1,8 @@
 import app from "./config/serverSettings";
 
-import { MainPage,  POSTMoreJobs } from "@controllers/mainPage";
-app.get("/", MainPage)
-app.post("/", POSTMoreJobs)
+import { GETMainPage,  POSTGetMoreJobs } from "@controllers/mainPage";
+app.get("/", GETMainPage)
+app.post("/", POSTGetMoreJobs)
 
 import User from "@routes/user.routes"
 app.use("/user", User)

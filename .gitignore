@@ -1,6 +1,5 @@
 node_modules
 .env
 notes.txt
-test.js
-test.ts
-
+/test
+/**/*.log

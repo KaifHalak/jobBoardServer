@@ -5,7 +5,6 @@ import { JobDetails } from "@utils/types/jobsTypes";
 
 
 interface filters{
-    [key: string] : string | undefined;
     role?: string,
     country?: string,
     city?: string,
@@ -178,7 +177,8 @@ class Database{
         const filterValues: (string | number)[] = [];
 
         for (const key in filters) {
-            let value = filters[key]!
+            let filterKey = key as keyof filters
+            let value = filters[filterKey]!
             switch (key) {
                 case "experience":
                     filterClauses.push(`experience < ?`);
