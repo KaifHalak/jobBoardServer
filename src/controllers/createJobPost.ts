@@ -8,6 +8,7 @@ import { interfaceExpress } from "@utils/types/authTypes";
 import { JobTypes, Locations } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
+import { ValidateEmail } from "@utils/validators";
 
 const FILE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "createJobPostUI", "index")
 
@@ -136,8 +137,7 @@ function ValidatePayload(payload: JobDetails){
 
 
     // email
-    let emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    if ( !(emailPattern.test(payload.email)) ){
+    if ( !(ValidateEmail(payload.email)) ){
         return {error: "Incorrect email format. Please follow the example given"}
     }
 

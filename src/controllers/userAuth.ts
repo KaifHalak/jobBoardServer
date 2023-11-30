@@ -7,6 +7,7 @@ import {  ServerError, CustomError } from "@middlewares/globalErrorHandling";
 import env from "@utils/env";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
+import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/validators";
 
 // Function:
 // Process Login and SignUp Requests
@@ -71,7 +72,7 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
     // Validation
 
     let result = ValidateUsername(username)
-    if (result?.error){
+    if (result !== true){
         logger.Events("Invalid username: POSTSignUp", {userId, userIp})
         return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
     }
@@ -122,39 +123,20 @@ export function GETSignupPage(req: Request, res: Response, next: NextFunction){
 
 // Helper Functions
 
-function ValidateEmail(email: string){
-    const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return pattern.test(email);
-}
-
-function ValidatePassword(password: string){
-    let length = Number(env("PASSWORD_LENGTH")!)
-    if (password.length >= length){
-        return true
-    }
-    return false
-}
-
-function ValidateUsername(username: string){
-
-    let allowedPatterns = /^[a-zA-Z0-9_]+$/
-
-    if ( !(username.length >= 3 && username.length <= 20) ){
-        return {error : "Username must be between 3 and 20 characters"}
-    }
-
-    if ( !(allowedPatterns.test(username)) ){
-        return {error: "Only characters from A-Z, a-z, numbers, and underscores are allowed."}
-    }
-
-    return
-
-}
-
 function AddCookie(res: Response, token: string){
     const options = {
         maxAge: eval(env("COOKIE_MAX_AGE")!),
         httpOnly: true
     }
     return res.cookie("sessionToken", token, options)
+}
+
+
+// Testing Purposes
+
+export let exportFunctionsForTesting = {
+    ValidateEmail,
+    ValidatePassword,
+    ValidateUsername,
+    AddCookie
 }

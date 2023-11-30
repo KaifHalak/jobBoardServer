@@ -6,6 +6,7 @@ import { ServerError, CustomError } from "@middlewares/globalErrorHandling";
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
 import db from "@utils/database"
 import logger from "@utils/logger/dataLogger";
+import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/validators";
 
 
 
@@ -143,7 +144,7 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
         let { newUsername } = req.body
 
         let result = ValidateUsername(newUsername)
-        if (result?.error){
+        if (result != true){
             logger.Events("Invalid username: POSTUpdateUsername", {userId, userIp})
             return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
         }
@@ -161,32 +162,5 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
     }
 
 
-
-}
-
-// Helper Functions
-
-function ValidateEmail(email: string){
-    const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return pattern.test(email);
-}
-
-function ValidatePassword(password: string){
-    return (password.length >= 6)
-}
-
-function ValidateUsername(username: string){
-
-    let allowedPatterns = /^[a-zA-Z0-9_]+$/
-
-    if ( !(username.length >= 3 && username.length <= 20) ){
-        return {error : "Username must be between 3 and 20 characters"}
-    }
-
-    if ( !(allowedPatterns.test(username)) ){
-        return {error: "Only characters from A-Z, a-z, numbers, and underscores are allowed."}
-    }
-
-    return
 
 }
