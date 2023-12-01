@@ -4,7 +4,7 @@
 import { describe, it, expect } from "vitest"
 import * as validators from "@utils/validators"
 
-describe("utils/validators", () => {
+describe("utils/validators UNIT TESTS", () => {
 
     describe("Validate Email", () => {
 

@@ -32,6 +32,11 @@ class Database{
     // User
 
     async SignupUser(email: string, password: string, username: string){
+
+        // Uncomment this when testing for SERVER ERROR
+        // throw Error("")
+
+        //@ts-ignore
         try {
             let query = `INSERT INTO users (email, password, username) VALUES (?, ?, ?)`
             let results = await this.query(query, [email, password, username])
@@ -44,6 +49,11 @@ class Database{
     }
 
     async LoginUser(email: string, password: string):Promise<string | null>{
+
+        // Uncomment this when testing for SERVER ERROR
+        // throw Error("")
+
+        //@ts-ignore
         try {
             let query = `SELECT userId FROM users WHERE email = ? AND password = ? `
             let result = await this.query(query, [email, password])

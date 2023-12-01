@@ -24,9 +24,15 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
     try {
 
         let {email, password} = req.body
-
+        
+        
         // Validation
     
+        if (!email || !password){
+            logger.Events("email and/or password missing from the body: POSTLogin", {userId, userIp})
+            return CustomError(req, res, next)("Email and/or password missing from the body", HttpStatusCodes.BAD_REQUEST)
+        }
+
         if (!ValidateEmail(email)){
             logger.Events("Invalid email: POSTLogin", {userId, userIp})
             return CustomError(req, res, next)("Invalid email format", HttpStatusCodes.BAD_REQUEST)
@@ -36,6 +42,7 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
             logger.Events("Invalid password: POSTLogin", {userId, userIp})
             return CustomError(req, res, next)("Password must be atleast 6 characters long",  HttpStatusCodes.BAD_REQUEST)
         }
+
 
     userId = await db.LoginUser(email, password)
     
@@ -54,7 +61,7 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
     catch (error) {
         let error_ = error as Error
         error_.message = "Error logging in user"
-        logger.Events(error_, {userId, userIp})
+        logger.Fatal(error_, {userId, userIp})
         return ServerError(req, res, next)()
     }
 
@@ -70,6 +77,11 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
     let {email, password, username} = req.body
 
     // Validation
+
+    if (!email || !password || !username){
+        logger.Events("email and/or username and/or password missing from the body: POSTLogin", {userId, userIp})
+        return CustomError(req, res, next)("Email and/or username and/or password missing from the body", HttpStatusCodes.BAD_REQUEST)
+    }
 
     let result = ValidateUsername(username)
     if (result !== true){
@@ -106,7 +118,7 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
    } catch (error) {
     let error_ = error as Error
     error_.message = "Error siging up user: POSTSignUp"
-    logger.Events(error_, {userId, userIp})
+    logger.Fatal(error_, {userId, userIp})
     return ServerError(req, res, next)()
    }
 }
@@ -135,8 +147,5 @@ function AddCookie(res: Response, token: string){
 // Testing Purposes
 
 export let exportFunctionsForTesting = {
-    ValidateEmail,
-    ValidatePassword,
-    ValidateUsername,
     AddCookie
 }
