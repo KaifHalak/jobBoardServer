@@ -4,21 +4,18 @@
 import { describe, it, expect } from "vitest"
 
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
+import MakeRequest from "@utils/makeRequests";
 
 const loginUrl = "http://localhost:3000/user/login"
 const signupUrl = "http://localhost:3000/user/signup"
 
-describe("/user/login INTEGRATION TEST", () => {
+describe("/user/ INTEGRATION TEST", () => {
 
     describe("Login", () => {
 
         it("should return BAD_REQUEST when paramters are missing from the body", async () => {
             
             let response = await MakeRequest(loginUrl, "POST", {})
-
-            if (!response){
-                return
-            }
 
             let statusCode = response.status
             let body = await response.json() as {error: string}
@@ -36,10 +33,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(loginUrl, "POST", {email, password})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -56,10 +49,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(loginUrl, "POST", {email, password})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -75,10 +64,6 @@ describe("/user/login INTEGRATION TEST", () => {
             let password = "1234567"
             
             let response = await MakeRequest(loginUrl, "POST", {email, password})
-
-            if (!response){
-                return
-            }
 
             let statusCode = response.status
             let body = await response.json() as {error: string}
@@ -97,10 +82,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(loginUrl, "POST", {email, password})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -116,10 +97,6 @@ describe("/user/login INTEGRATION TEST", () => {
             let password = "123456"
             
             let response = await MakeRequest(loginUrl, "POST", {email, password})
-
-            if (!response){
-                return
-            }
 
             let statusCode = response.status
             let cookie = response.headers.getSetCookie()[0]
@@ -142,10 +119,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(signupUrl, "POST", {})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -165,10 +138,6 @@ describe("/user/login INTEGRATION TEST", () => {
 
             let response = await MakeRequest(signupUrl, "POST", {email, password, username})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -182,9 +151,7 @@ describe("/user/login INTEGRATION TEST", () => {
             
              response = await MakeRequest(signupUrl, "POST", {email, password, username})
 
-            if (!response){
-                return
-            }
+
 
             statusCode = response.status
             body = await response.json() as {error: string}
@@ -203,10 +170,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(signupUrl, "POST", {email, password,username})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -224,10 +187,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(signupUrl, "POST", {email, password, username})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -244,10 +203,6 @@ describe("/user/login INTEGRATION TEST", () => {
             let password = "123456"
             
             let response = await MakeRequest(signupUrl, "POST", {email, password, username})
-
-            if (!response){
-                return
-            }
 
             let statusCode = response.status
             let body = await response.json() as {error: string}
@@ -267,10 +222,6 @@ describe("/user/login INTEGRATION TEST", () => {
             
             let response = await MakeRequest(signupUrl, "POST", {email, password, username})
 
-            if (!response){
-                return
-            }
-
             let statusCode = response.status
             let body = await response.json() as {error: string}
             let error = body.error
@@ -288,10 +239,6 @@ describe("/user/login INTEGRATION TEST", () => {
             let password = "123456"
             
             let response = await MakeRequest(signupUrl, "POST", {email, password, username})
-
-            if (!response){
-                return
-            }
 
             let statusCode = response.status
             let cookie = response.headers.getSetCookie()[0]
@@ -311,28 +258,3 @@ describe("/user/login INTEGRATION TEST", () => {
 
 })
 
-
-async function MakeRequest(url: string,method: Methods, payload: Record<any,any>){
-
-    let headers = {
-        'Content-Type': 'application/json'
-    }
-
-    let options = {
-        method,
-        headers,
-        body: JSON.stringify(payload)
-    }
-
-    return fetch(url, options)
-    .then((response) => {
-        return response
-    })
-
-    .catch((error: any) => {
-        return console.log("Error Fetching during test:", error)
-    })
-
-}
-
-type Methods = "GET" | "POST" | "PATCH" | "DELETE" 

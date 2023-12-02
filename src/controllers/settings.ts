@@ -56,7 +56,7 @@ export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: 
         }
 
         if (!(ValidatePassword(password))){
-            logger.Events("Incorrect password: POSTUpdateEmail", {userId, userIp})
+            logger.Events("Incorrect password format: POSTUpdateEmail", {userId, userIp})
             return CustomError(req, res, next)("Password must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -79,7 +79,7 @@ export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: 
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error updating user email: POSTUpdateEmail"
-        logger.Error(error_, {userId, userIp})
+        logger.Fatal(error_, {userId, userIp})
         return ServerError(req, res, next)()
     }
 
@@ -109,7 +109,7 @@ export async function POSTUpdatePassword(req: interfaceExpress.customRequest, re
         }
 
         if (!ValidatePassword(newPassword) || !(ValidatePassword(currentPassword))){
-            logger.Events("Incorrect password length: POSTUpdatePassword", {userId, userIp})
+            logger.Events("Incorrect password format: POSTUpdatePassword", {userId, userIp})
             return CustomError(req, res, next)("Password must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -127,7 +127,7 @@ export async function POSTUpdatePassword(req: interfaceExpress.customRequest, re
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error updating password: POSTUpdatePassword"
-        logger.Events(error_, {userId, userIp})
+        logger.Fatal(error_, {userId, userIp})
         return ServerError(req, res, next)()
     }
 
@@ -157,7 +157,7 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error updating username: POSTUpdateUsername"
-        logger.Events(error_, {userId, userIp})
+        logger.Error(error_, {userId, userIp})
         return ServerError(req, res, next)()
     }
 

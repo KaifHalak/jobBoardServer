@@ -23,7 +23,7 @@ export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res:
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error getting saved jobs page: GETSavedJobsPage"
-        logger.Fatal(error_, {userId, userIp})
+        logger.Error(error_, {userId, userIp})
         ServerError(req, res, next)()
     }   
 

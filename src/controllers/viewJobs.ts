@@ -41,7 +41,7 @@ export default async function GETViewJob(req: interfaceExpress.customRequest, re
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error GETViewJob"
-        logger.Events(error_, {userId, userIp, jobId})
+        logger.Error(error_, {userId, userIp, jobId})
         ServerError(req, res, next)()
     }
 

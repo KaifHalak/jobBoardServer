@@ -2,6 +2,10 @@
 // https://github.com/XenZi/rilb
 // https://gist.github.com/mtimbs/0eaf27df08cff8f4ca4303de60bf617b
 {
+  "ts-node": {
+  // Do not forget to `npm i -D tsconfig-paths`
+  "require": ["tsconfig-paths/register"]
+},
   "compilerOptions": {
     /* Base Options: */
     "esModuleInterop": true,

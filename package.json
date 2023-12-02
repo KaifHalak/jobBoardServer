@@ -8,8 +8,9 @@
     "distFolder": "ts-node ./extras/distFolder.ts",
     "build": "npm run distFolder && tsc",
     "server": "nodemon -r tsconfig-paths/register  ./src/server.ts",
+    "standalone-server": "ts-node ./src/server.ts",
     "test": "cls && vitest run --reporter=verbose --config vitest.config.ts",
-    "test-w": "vitest ./tests/controllers/userAuth.test.ts --config vitest.config.ts"
+    "test-w": "vitest ./tests/controllers/settings.test.ts --config vitest.config.ts"
   },
   "keywords": [],
   "author": "",
