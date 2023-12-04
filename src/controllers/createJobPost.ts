@@ -10,7 +10,7 @@ import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
 import { ValidateEmail } from "@utils/validators";
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "createJobPostUI", "index")
+const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "createJobPostUI", "index")
 
 // Send user the file
 export async function GETCreateJobPostPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){

@@ -169,6 +169,38 @@ class Database{
             throw Error("Database error")
         }
     }  
+
+    async GetCreatedJobs(userId: string, offset: Number = 0){ 
+        try {
+            let query = `SELECT jobTitle, type, country, city, companyName, jobDescription, jobRequirements, experience, jobId FROM jobs WHERE userId = ? LIMIT 9 OFFSET ?`
+            let results = await this.query(query, [userId, offset])
+            return results
+        } catch (error) {
+            console.log("Error getting saved jobs from DB", error)
+            throw Error("Database error")
+        }
+    }  
+
+    async DeleteJob(userId: string, jobId: number){
+        try {
+
+            let query = "SELECT jobId FROM jobs WHERE jobId = ? AND userId = ?"
+            let results = await this.query(query, [jobId,userId])
+
+            if (!results[0]){
+                return false
+            }
+
+            query = `DELETE FROM savedJobs WHERE jobId = ?`
+            await this.query(query, [jobId])
+            query = `DELETE FROM jobs WHERE jobId = ? AND userId = ?`
+            await this.query(query, [jobId,userId])
+            return true
+        } catch (error) {
+            console.log("Error deleting job", error)
+            throw Error("Database error")
+        }
+    } 
     
     async GetJob(jobId: string){
         try {

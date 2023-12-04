@@ -12,8 +12,8 @@ import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/valida
 // Function:
 // Process Login and SignUp Requests
 
-const LOGIN_PAGE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "loginUI", "index.html")
-const SIGNUP_PAGE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "signupUI", "index.html")
+const LOGIN_PAGE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "loginUI", "index.html")
+const SIGNUP_PAGE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "signupUI", "index.html")
 
 
 export async function POSTLogin(req:Request, res: Response, next: NextFunction){

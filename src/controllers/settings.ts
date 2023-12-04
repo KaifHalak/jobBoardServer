@@ -10,7 +10,7 @@ import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/valida
 
 
 
-const settingsPage = path.join(__dirname, "../", "../", "../", "client", "public", "settingsUI", "index")
+const settingsPage = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "settingsUI", "index")
 
 
 export async function GETSettings(req: interfaceExpress.customRequest, res: Response, next: NextFunction){

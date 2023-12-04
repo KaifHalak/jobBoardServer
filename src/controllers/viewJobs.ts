@@ -12,7 +12,7 @@ import logger from "@utils/logger/dataLogger";
 // View a more detailed version of a job posting
 
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "viewJobPostUI", "index.ejs")
+const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "viewJobPostUI", "index.ejs")
 
 export default async function GETViewJob(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
 

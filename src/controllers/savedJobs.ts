@@ -6,7 +6,7 @@ import { interfaceExpress } from "@utils/types/authTypes";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "client", "public", "savedJobsUI", "index.ejs")
+const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "savedJobsUI", "index.ejs")
 
 export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
 

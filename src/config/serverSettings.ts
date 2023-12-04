@@ -6,8 +6,8 @@ import env from "../utils/env"
 import path from "path"
 import logger from "@utils/logger/dataLogger";
 
-const EJS_PATH = path.join(__dirname, "../", "../", "../", "client", "src")
-const STATIC_FILES_PATH = express.static(path.join(__dirname, "../", "../", "../", "client", "public"))
+const EJS_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "src")
+const STATIC_FILES_PATH = express.static(path.join(__dirname, "../", "../", "../", "jobBoardClient", "public"))
 
 const app = express();
 const server = http.createServer(app);

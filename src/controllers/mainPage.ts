@@ -9,7 +9,7 @@ import logger from "@utils/logger/dataLogger";
 import { VerifyToken } from "@utils/security/jwtToken";
 
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../",  "client", "public", "mainUI", "index")
+const FILE_PATH = path.join(__dirname, "../", "../", "../",  "jobBoardClient", "public", "mainUI", "index")
 const JOB_TYPES = Object.values(JobTypes)
 const COUNTRIES = Locations
 
