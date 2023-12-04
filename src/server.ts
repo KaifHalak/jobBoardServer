@@ -16,4 +16,7 @@ app.use("/settings", Settings)
 import Jobs from "@routes/jobs.routes"
 app.use("/jobs", Jobs)
 
+import { GETPageNotFound } from "@controllers/pageNotFound";
+app.use("/", GETPageNotFound)
+
 

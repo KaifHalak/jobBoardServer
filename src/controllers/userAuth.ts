@@ -132,6 +132,11 @@ export function GETSignupPage(req: Request, res: Response, next: NextFunction){
     return res.sendFile(SIGNUP_PAGE_PATH)
 }
 
+export function GETLogoutUser(req: Request, res: Response, next: NextFunction){
+    return res.cookie("sessionToken", "", {httpOnly: true}).redirect("/user/login")
+    
+}
+
 
 // Helper Functions
 

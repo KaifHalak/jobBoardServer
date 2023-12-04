@@ -213,6 +213,22 @@ class Database{
         }
     }
 
+    async IncrementViewCounter(jobId: string){
+        try {
+            let query = `SELECT views FROM jobs WHERE jobId = ?`
+            let results = await this.query(query,[jobId])
+
+            let views = results[0].views
+
+            query = "UPDATE jobs SET views = ? WHERE jobId = ?"
+            await this.query(query,[views + 1,jobId])
+
+        } catch (error) {
+            console.log("Error getting a job from DB", error)
+            throw Error("Database error")
+        }
+    }
+
     async GetAllJobs(filters: filters) {
     try {
         const filterClauses: string[] = [];

@@ -18,7 +18,7 @@ export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res:
 
         logger.Events("GETSavedJobsPage successfully: GETSavedJobsPage", {userId, userIp})
 
-        return res.render(FILE_PATH, {allJobs, allSavedJobIds: false})
+        return res.render(FILE_PATH, {allJobs, allSavedJobIds: false, deleteJobs: false})
 
     } catch (error) {
         let error_ = error as Error

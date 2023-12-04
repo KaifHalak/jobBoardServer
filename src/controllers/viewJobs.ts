@@ -26,7 +26,8 @@ export default async function GETViewJob(req: interfaceExpress.customRequest, re
             logger.Events("Job id not a number: GETViewJob", {userId, userIp, jobId})
             return res.send({error:"Incorrect job id"})
         }
-
+        
+        await db.IncrementViewCounter(jobId)
         let jobInfo = await db.GetJob(jobId)
 
         // Job doesnt exist
