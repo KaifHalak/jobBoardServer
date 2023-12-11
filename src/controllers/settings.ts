@@ -9,6 +9,9 @@ import db from "@utils/database"
 import logger from "@utils/logger/dataLogger";
 import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/validators";
 
+
+
+
 const SETTINGS_PAGE = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "settingsUI", "index")
 const TEMP_IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "temp")
 const FINAL_IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "final")
@@ -20,10 +23,21 @@ export async function GETSettings(req: interfaceExpress.customRequest, res: Resp
 
     try {
         let { username, email } = await db.GetUserEmailAndUsername(userId)
+        let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
+
+        if (!profilePicUrlPath){
+            profilePicUrlPath = "default.png"
+        }
+
+        let profilePicFullURLPath = path.join(FINAL_IMAGE_FILE_PATH, profilePicUrlPath)
         
+        const contents = fs.readFileSync(profilePicFullURLPath)
+        const b64 = contents.toString('base64')
+        const type = "png"
+
         logger.Events("GETSettings successfull", {userId, userIp})
 
-        return res.render(SETTINGS_PAGE,{username, email})
+        return res.render(SETTINGS_PAGE,{username, email, profilePic: `data:${type};base64,${b64}`})
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error getting settings page: GETSettings"
@@ -203,9 +217,12 @@ export async function POSTUpdateProfilePic(req: interfaceExpress.customRequest, 
                 let readStream = fs.createReadStream(tempImageFilePath)
                 let writeStream = fs.createWriteStream(finalImageFilePath)
 
-                writeStream.on("finish", () => {
+                writeStream.on("finish", async () => {
                     fs.unlink(tempImageFilePath, () => {})
+
                     delete req.file
+
+                    await db.UpdateProfilePicture(userId, fileName)
                 })
 
                 readStream.pipe(writeStream)

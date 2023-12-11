@@ -87,6 +87,17 @@ class Database{
             throw Error("Database Error!")
         }
     }
+
+    async GetUserProfilePicURLPath( userId: string ){
+        try {
+            let query = `SELECT profilePicUrlPath FROM users WHERE userId = ?`
+            let results = await this.query(query,[userId])
+            return results[0]
+        } catch (error) {
+            console.log("Error getting username and email", error)
+            throw Error("Database Error!")
+        }
+    }
     
     async UpdateUserUsername(username: string, userId: string){
         try {
@@ -123,6 +134,16 @@ class Database{
         }
     }
 
+    async UpdateProfilePicture(userId: string, urlPath: string){
+        try {
+            let query = `UPDATE users SET profilePicUrlPath = ? WHERE userId = ?`
+            await this.query(query,[urlPath, userId])
+            return true
+        } catch (error) {
+            console.log("Error unsaving job from DB", error)
+            throw Error("Database error")
+        }
+    }
 
     // Jobs
     async CreateJob(paylaod: JobDetails, userId: string) {
