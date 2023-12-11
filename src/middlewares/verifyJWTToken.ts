@@ -11,8 +11,10 @@ export default function VerifyJWTToken(req: interfaceExpress.customRequest, res:
     let token = req.cookies["sessionToken"] as string
     let payload = VerifyToken(token)
 
-    // If token invalid or expired
-    if (!payload){
+    let timeRemainingMin = TimeRemainingBeforeExpMin(payload?.exp!)
+
+    // If token invalid or expired or 2 minutes are remaining
+    if (!payload || timeRemainingMin < 2){
 
         logger.Events("User unauthorized: VerifyJWTToken", {userIp: req.ip!})
 
@@ -27,7 +29,17 @@ export default function VerifyJWTToken(req: interfaceExpress.customRequest, res:
         }
 
     }
+
     req.userId = payload?.userId
     logger.Events("User authorized: VerifyJWTToken", {userId: req.userId, userIp: req.ip!})
     return next()
+}
+
+
+
+function TimeRemainingBeforeExpMin(exp: number){
+
+    let currentTimeMin = (new Date().getTime() / 1000) / 60
+    return exp - currentTimeMin
+
 }

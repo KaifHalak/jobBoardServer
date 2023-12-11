@@ -20,12 +20,22 @@ class Logger {
             message = message.stack!
         }
 
-        this.OutputToConsole(level, message, payload)
-        this.WriteToFile(level, message, payload)
+        if (config["all"].console){
+            this.OutputToConsole(level, message, payload)
+        }
+
+        if (config["all"].saveToFile){
+            this.WriteToFile(level, message, payload)
+        }
+
 
     }   
 
     private OutputToConsole(level: TLogger, message: string | Error, payload: TPayload = {}){
+
+        if (!config[level].console){
+            return
+        }
 
         let color = config[level].color as typeof chalk.Color
         let chalkInstance = chalk[color]

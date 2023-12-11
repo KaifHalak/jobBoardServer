@@ -1,32 +1,44 @@
 let config = {
+    all: {
+        color: "", // Ignore this
+        saveToFile: true,
+        console: true
+    },
+
     events: {
         color: "green",
-        saveToFile: false
+        saveToFile: false,
+        console: false
     },
 
     error: {
         color: "red",
-        saveToFile: true
+        saveToFile: true,
+        console: true
     },
 
     fatal: {
         color: "redBright",
-        saveToFile: true
+        saveToFile: true,
+        console: true
     },
 
     debug: {
         color: "white",
-        saveToFile: false
+        saveToFile: false,
+        console: true
     },
 
     warn: {
         color: "yellow",
-        saveToFile: true
+        saveToFile: true,
+        console: true
     },
 
     database: {
         color: "cyan",
-        saveToFile: true
+        saveToFile: true,
+        console: true
     }
 }
 

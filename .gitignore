@@ -3,3 +3,5 @@ node_modules
 notes.txt
 test.ts
 /**/*.log
+jobBoardUserImages
+.gitignore
