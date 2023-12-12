@@ -1,5 +1,6 @@
 import { Response, NextFunction } from "express"
 import path from "path"
+import fs from "fs"
 
 import { ServerError } from "@middlewares/globalErrorHandling";
 import { interfaceExpress } from "@utils/types/authTypes";
@@ -12,6 +13,8 @@ import { VerifyToken } from "@utils/security/jwtToken";
 const FILE_PATH = path.join(__dirname, "../", "../", "../",  "jobBoardClient", "public", "mainUI", "index")
 const JOB_TYPES = Object.values(JobTypes)
 const COUNTRIES = Locations
+
+const IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "final")
 
 
 interface filters{
@@ -32,13 +35,37 @@ export async function GETMainPage(req: interfaceExpress.customRequest, res: Resp
     let userId = VerifyToken(token)?.userId
     let userIp = req.ip!
     let filters: filters = {}
+
     try {
         filters = req.query
 
         let {allJobs, allSavedJobIds} = await RetrieveJobData(filters, userId)
 
+        let fullProfilePicUrlPath: string , username: string
+
+        if (userId){
+            let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
+            
+            if (!profilePicUrlPath){
+                fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, "default.png")
+            }
+            else {
+                fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, profilePicUrlPath)
+            }
+            username = await db.GetUsername(userId)
+        } else {
+            fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, "default.png")
+            username = "Login"
+        }
+
+        const contents = fs.readFileSync(fullProfilePicUrlPath)
+        const b64 = contents.toString('base64')
+        const type = "png"
+        
+        // let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
+
         logger.Events("GETMainPage successfull", {userId, userIp, filters})
-        return res.render(FILE_PATH, {allJobs, allSavedJobIds, jobTypes: JOB_TYPES, countries: COUNTRIES, filters})
+        return res.render(FILE_PATH, {allJobs, allSavedJobIds, jobTypes: JOB_TYPES, countries: COUNTRIES, filters, profilePic: `data:${type};base64,${b64}`, username})
 
     } catch (error) {
         let error_ = error as Error        

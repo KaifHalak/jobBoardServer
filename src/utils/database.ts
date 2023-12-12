@@ -98,6 +98,17 @@ class Database{
             throw Error("Database Error!")
         }
     }
+
+    async GetUsername( userId: string ){
+        try {
+            let query = `SELECT username FROM users WHERE userId = ?`
+            let results = await this.query(query,[userId])
+            return results[0]["username"]
+        } catch (error) {
+            console.log("Error getting username and email", error)
+            throw Error("Database Error!")
+        }
+    }
     
     async UpdateUserUsername(username: string, userId: string){
         try {
