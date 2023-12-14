@@ -6,8 +6,9 @@ import { CustomRequest } from "@utils/interfaces/authTypes"
 import { ServerError, CustomError } from "@middlewares/globalErrorHandling";
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
 import db from "@utils/database"
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
 import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/validators";
+import { ControllerCatchError } from "@utils/catchError";
 
 
 // Function:
@@ -38,15 +39,13 @@ export async function GETSettings(req: CustomRequest, res: Response, next: NextF
         const b64 = contents.toString('base64')
         const type = "png"
 
-        logger.Events("GETSettings successfull", {userId, userIp})
+        logger.events("GETSettings successfull", {userId, userIp})
 
         return res.render(SETTINGS_PAGE,{username, email, profilePic: `data:${type};base64,${b64}`})
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error getting settings page: GETSettings"
-        logger.Error(error_, {userId, userIp})
-        ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `settings/${GETSettings.name}()`, "error", {userId, userIp})
     }
 }
 
@@ -64,25 +63,25 @@ export async function POSTUpdateEmail(req: CustomRequest, res: Response, next: N
         // Validation
 
         if (!newEmail){
-            logger.Events("'newEmail' missing from the body: POSTUpdateEmail", {userId, userIp})
+            logger.events("'newEmail' missing from the body: POSTUpdateEmail", {userId, userIp})
             return CustomError(req, res, next)("'newEmail' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
         if (!password){
-            logger.Events("'passsword' missing from the body: POSTUpdateEmail", {userId, userIp})
+            logger.events("'passsword' missing from the body: POSTUpdateEmail", {userId, userIp})
             return CustomError(req, res, next)("'passsword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
         let validateResult: boolean | {error: string}
         validateResult = ValidatePassword(password)
         if (validateResult !== true){
-            logger.Events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
+            logger.events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         validateResult = ValidateEmail(newEmail)
         if (validateResult !== true){
-            logger.Events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
+            logger.events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -91,19 +90,17 @@ export async function POSTUpdateEmail(req: CustomRequest, res: Response, next: N
         // if password is incorrect
 
         if (!result){
-            logger.Events("Incorrect password: POSTUpdateEmail", {userId, userIp})
+            logger.events("Incorrect password: POSTUpdateEmail", {userId, userIp})
             return CustomError(req, res, next)("Incorrect password", HttpStatusCodes.UNAUTHORIZED)
         }
 
-        logger.Events("Email updated successfully: POSTUpdateEmail", {userId, userIp})
+        logger.events("Email updated successfully: POSTUpdateEmail", {userId, userIp})
         return res.send({status: "Email updated successfully"})
 
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error updating user email: POSTUpdateEmail"
-        logger.Fatal(error_, {userId, userIp})
-        return ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `settings/${POSTUpdateEmail.name}()`, "error", {userId, userIp})
     }
 
 
@@ -122,12 +119,12 @@ export async function POSTUpdatePassword(req: CustomRequest, res: Response, next
         // Validation
 
         if (!currentPassword){
-            logger.Events("'currentPassword' missing from the body: POSTUpdatePassword", {userId, userIp})
+            logger.events("'currentPassword' missing from the body: POSTUpdatePassword", {userId, userIp})
             return CustomError(req, res, next)("'currentPassword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
         if (!newPassword){
-            logger.Events("'newPassword' missing from the body: POSTUpdatePassword", {userId, userIp})
+            logger.events("'newPassword' missing from the body: POSTUpdatePassword", {userId, userIp})
             return CustomError(req, res, next)("'newPassword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -135,13 +132,13 @@ export async function POSTUpdatePassword(req: CustomRequest, res: Response, next
 
         validateResult = ValidatePassword(newPassword)
         if (validateResult !== true){
-            logger.Events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
+            logger.events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         validateResult = ValidatePassword(currentPassword)
         if (validateResult !== true){
-            logger.Events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
+            logger.events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -150,20 +147,18 @@ export async function POSTUpdatePassword(req: CustomRequest, res: Response, next
         // if password is incorrect
 
         if (!result){
-            logger.Events("Incorrect password: POSTUpdatePassword", {userId, userIp})
+            logger.events("Incorrect password: POSTUpdatePassword", {userId, userIp})
             return CustomError(req, res, next)("Incorrect password", HttpStatusCodes.UNAUTHORIZED)
 
         }
 
-        logger.Events("Password updated successfully: POSTUpdatePassword", {userId, userIp})
+        logger.events("Password updated successfully: POSTUpdatePassword", {userId, userIp})
         return res.send({status: "Password updated successfully"})
 
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error updating password: POSTUpdatePassword"
-        logger.Fatal(error_, {userId, userIp})
-        return ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `settings/${POSTUpdatePassword.name}()`, "error", {userId, userIp})
     }
 
 
@@ -180,20 +175,18 @@ export async function POSTUpdateUsername(req: CustomRequest, res: Response, next
 
         let result = ValidateUsername(newUsername)
         if (result != true){
-            logger.Events(`${result.error}: POSTUpdateUsername`, {userId, userIp})
+            logger.events(`${result.error}: POSTUpdateUsername`, {userId, userIp})
             return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         await db.UpdateUserUsername(newUsername, userId!)
-        logger.Events("Username updated successfully: POSTUpdateUsername", {userId, userIp})
+        logger.events("Username updated successfully: POSTUpdateUsername", {userId, userIp})
         return res.send({status: "Username updated successfully"})
 
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error updating username: POSTUpdateUsername"
-        logger.Error(error_, {userId, userIp})
-        return ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `settings/${POSTUpdateUsername.name}()`, "error", {userId, userIp})
     }
 
 
@@ -273,7 +266,7 @@ export async function POSTUpdateProfilePic(req: CustomRequest, res: Response, ne
 
         }
 
-        logger.Error(error_, {userId, userIp})
+        logger.error(error_, {userId, userIp})
         return ServerError(req, res, next)()
 
     }

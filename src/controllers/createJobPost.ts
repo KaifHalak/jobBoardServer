@@ -7,9 +7,9 @@ import { JobDetails } from "@utils/interfaces/jobsTypes";
 import { CustomRequest } from "@utils/interfaces/authTypes";
 import { JobTypes, Locations } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
 import { ValidateEmail } from "@utils/validators";
-
+import { ControllerCatchError } from "@utils/catchError";
 
 // Function:
 // CreateJobPost UI and its related operations
@@ -22,7 +22,7 @@ export async function GETCreateJobPostPage(req: CustomRequest, res: Response, ne
     // Send user the file
     let userIp = req.ip
     let userId = req.userId
-    logger.Events("GETCreateJobPostPage successfull", {userIp, userId})
+    logger.events("GETCreateJobPostPage successfull", {userIp, userId})
 
     res.render(CREATE_JOB_POST_UI_PATH,{countries: Locations})
 
@@ -41,21 +41,19 @@ export async function POSTCreateJobPost(req: CustomRequest, res: Response, next:
         let validation = ValidatePayload(payload)
 
         if (validation?.error){
-            logger.Events("Payload validation failed: POSTCreateJobPost", {userId, userIp})
+            logger.events("Payload validation failed: POSTCreateJobPost", {userId, userIp})
             return CustomError(req, res, next)(validation.error, HttpStatusCodes.BAD_REQUEST)
         }
     
         // Create job post in DB
         await db.CreateJob(payload, userId)
 
-        logger.Events("Job post created successfully: POSTCreateJobPost", {userId, userIp, payload})
+        logger.events("Job post created successfully: POSTCreateJobPost", {userId, userIp, payload})
         return res.send({status:"Success"})
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error creating job post: POSTCreateJobPost"
-        logger.Error(error_, {userId, userIp})
-        ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `createJobPost/${POSTCreateJobPost.name}()`, "error", {userId, userIp})
     }
 }
 

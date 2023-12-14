@@ -4,7 +4,8 @@ import path from "path"
 import { ServerError } from "@middlewares/globalErrorHandling";
 import { CustomRequest } from "@utils/interfaces/authTypes";
 import db from "@utils/database";
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
+import { ControllerCatchError } from "@utils/catchError";
 
 const USERS_CREATED_JOB_POSTS_UI_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "yourJobsUI", "index.ejs")
 
@@ -19,7 +20,7 @@ export async function GETUsersJobPostsPage(req: CustomRequest, res: Response, ne
     try {
         let allJobs = await db.GetCreatedJobs(userId)
 
-        logger.Events("GETYourJobsPage successfull", {userId, userIp})
+        logger.events("GETYourJobsPage successfull", {userId, userIp})
 
         // allJobs: Information about job posts
 
@@ -32,9 +33,7 @@ export async function GETUsersJobPostsPage(req: CustomRequest, res: Response, ne
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error getting saved jobs page: GETYourJobsPage"
-        logger.Error(error_, {userId, userIp})
-        ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `yourJobs/${GETUsersJobPostsPage.name}()`, "error", {userId, userIp})
     }   
 
 }
@@ -53,15 +52,13 @@ export async function POSTDeleteJob(req: CustomRequest, res: Response, next: Nex
 
         if (result){
             res.send({status:"Job deleted successfully"})
-            logger.Events("Job deleted successfully: POSTDeleteJob", {userId, userIp})
+            logger.events("Job deleted successfully: POSTDeleteJob", {userId, userIp})
         }
 
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error deleting job: POSTDeleteJob"
-        logger.Error(error_, {userId, userIp})
-        ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `yourJobs/${POSTDeleteJob.name}()`, "error", {userId, userIp})
     }   
 
 }
@@ -78,13 +75,12 @@ export async function POSTGetMoreUsersJobs(req: CustomRequest, res: Response, ne
 
         offset = Number(req.query.offset)
         let moreJobs = await db.GetCreatedJobs(userId, offset)
-        logger.Events("More jobs for the created jobs page sent to user successfully: POSTGetMoreYourJobs",{userId, userIp, offset})
+        logger.events("More jobs for the created jobs page sent to user successfully: POSTGetMoreYourJobs",{userId, userIp, offset})
         return res.send({status: {moreJobs}})
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error requesting for more jobs: POSTGetMoreJobs"
-        logger.Error(error_, {userId, userIp, offset: offset.toString()})
+        ControllerCatchError(req, res, next)(error_, `yourJobs/${POSTGetMoreUsersJobs.name}()`, "error", {userId, userIp, offset})
 
         ServerError(req, res, next)()
     }

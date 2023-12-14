@@ -6,9 +6,9 @@ import { ServerError } from "@middlewares/globalErrorHandling";
 import { CustomRequest } from "@utils/interfaces/authTypes";
 import { JobTypes, Locations  } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
 import { VerifyToken } from "@utils/security/jwtToken";
-
+import { ControllerCatchError } from "@utils/catchError";
 
 // Function:
 // MAIN page UI and its related operations
@@ -69,7 +69,7 @@ export async function GETMainPage(req: CustomRequest, res: Response, next: NextF
         const b64 = contents.toString('base64')
         const type = "png"
 
-        logger.Events("GETMainPage successfull", {userId, userIp})
+        logger.events("GETMainPage successfull", {userId, userIp})
 
 
         // allJobs: Information about job posts
@@ -90,9 +90,7 @@ export async function GETMainPage(req: CustomRequest, res: Response, next: NextF
 
     } catch (error) {
         let error_ = error as Error        
-        error_.message = "Error getting main page: GETMainPage"
-        logger.Fatal(error_, {userId, userIp, filters}) 
-        ServerError(req, res, next)()
+        ControllerCatchError(req, res, next)(error_, `mainPage/${GETMainPage.name}()`, "error", {userId, userIp, filters})
     }
 }
 
@@ -110,14 +108,13 @@ export async function POSTGetMoreJobs(req: CustomRequest, res: Response, next: N
         filters = req.query
         let {allJobs, allSavedJobIds} = await RetrieveJobData(filters, userId)
         
-        logger.Events("More jobs for the main page sent to user successfully: POSTGetMoreJobs",{userId, userIp, filters})
+        logger.events("More jobs for the main page sent to user successfully: POSTGetMoreJobs",{userId, userIp, filters})
 
         return res.send({status: {allJobs, allSavedJobIds}})
 
     } catch (error) {
         let error_ = error as Error
-        error_.message = "Error requesting for more jobs: POSTGetMoreJobs"
-        logger.Error(error_, {userId, userIp, filters})
+        ControllerCatchError(req, res, next)(error_, `mainPage/${POSTGetMoreJobs.name}()`, "error", {userId, userIp, filters})
 
         ServerError(req, res, next)()
     }

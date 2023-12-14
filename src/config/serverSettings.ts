@@ -4,7 +4,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import env from "../utils/env"
 import path from "path"
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
 
 const EJS_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "src")
 const STATIC_FILES_PATH = express.static(path.join(__dirname, "../", "../", "../", "jobBoardClient", "public"))
@@ -22,7 +22,7 @@ app.use(cookieParser())
 let PORT = env("SERVER_PORT")
 
 server.listen(PORT, () => {
-    logger.Events(`listening on port ${PORT}`)
+    logger.events(`listening on port ${PORT}`)
   });
 
 export default app

@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express"
 
 import { VerifyToken } from "@utils/security/jwtToken";
 import { CustomRequest } from "@utils/interfaces/authTypes";
-import logger from "@utils/logger/dataLogger";
+import { logger } from "@utils/logger/dataLogger";
 
 // Function:
 // Verify JWT Token for authentication.
@@ -17,7 +17,7 @@ export default function VerifyAndProcessJWTToken(req: CustomRequest, res: Respon
     // If token is invalid or expired or 2 minutes are remaining before expiration
     if (!payload || timeRemainingInMin < 2){
 
-        logger.Events("User unauthorized: VerifyJWTToken", {userIp: req.ip!})
+        logger.events("User unauthorized: VerifyJWTToken", {userIp: req.ip!})
 
         // Redirect user to login page
         if (req.method === "GET"){
@@ -32,7 +32,7 @@ export default function VerifyAndProcessJWTToken(req: CustomRequest, res: Respon
     }
 
     req.userId = payload!.userId
-    logger.Events("User authorized: VerifyJWTToken", {userId: req.userId, userIp: req.ip})
+    logger.events("User authorized: VerifyJWTToken", {userId: req.userId, userIp: req.ip})
     return next()
 }
 

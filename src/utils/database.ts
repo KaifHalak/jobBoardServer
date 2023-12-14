@@ -2,6 +2,7 @@ import mysql from "mysql2"
 import env from "./env"
 import util from "util"
 import { JobDetails } from "@utils/interfaces/jobsTypes";
+import { DatabaseCatchError } from "./catchError";
 
 
 interface filters{
@@ -33,35 +34,28 @@ class Database{
 
     async SignupUser(email: string, password: string, username: string){
 
-        // Uncomment this when testing for SERVER ERROR
-        // throw Error("")
-
-        //@ts-ignore
         try {
             let query = `INSERT INTO users (email, password, username) VALUES (?, ?, ?)`
             let results = await this.query(query, [email, password, username])
             let { insertId } = results
             return insertId 
         } catch (error) {
-            console.log("Error inserting data into user's table", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.SignupUser.name}()`)
         }
     }
 
     async LoginUser(email: string, password: string):Promise<string | null>{
 
-        // Uncomment this when testing for SERVER ERROR
-        // throw Error("")
 
-        //@ts-ignore
         try {
             let query = `SELECT userId FROM users WHERE email = ? AND password = ? `
             let result = await this.query(query, [email, password])
             let userId  = result[0]?.userId || null
             return userId
         } catch (error) {
-            console.log("Error logging in user", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.LoginUser.name}()`)
         }
     }
 
@@ -72,8 +66,8 @@ class Database{
             let userId = results[0]?.userId || null
             return userId
         } catch (error) {
-            console.log("Error checking if user exists", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.CheckIfUserExists.name}()`)
         }
     }
 
@@ -83,8 +77,8 @@ class Database{
             let results = await this.query(query,[userId])
             return results[0] || null
         } catch (error) {
-            console.log("Error getting username and email", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetUserEmailAndUsername.name}()`)
         }
     }
 
@@ -94,8 +88,8 @@ class Database{
             let results = await this.query(query,[userId])
             return results[0]
         } catch (error) {
-            console.log("Error getting username and email", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetUserProfilePicURLPath.name}()`)
         }
     }
 
@@ -105,8 +99,8 @@ class Database{
             let results = await this.query(query,[userId])
             return results[0]["username"]
         } catch (error) {
-            console.log("Error getting username and email", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetUsername.name}()`)
         }
     }
     
@@ -116,8 +110,8 @@ class Database{
             await this.query(query, [username, userId])
             return true
         } catch (error) {
-            console.log("Error updating username", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.UpdateUserUsername.name}()`)
         }
     }
 
@@ -128,8 +122,8 @@ class Database{
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
-            console.log("Error updating email", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.UpdateUserEmail.name}()`)
         }
     }
 
@@ -140,8 +134,8 @@ class Database{
             return results.changedRows // either 0 (failed )or 1 (successful)
 
         } catch (error) {
-            console.log("Error updating password", error)
-            throw Error("Database Error!")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.UpdateUserPassword.name}()`)
         }
     }
 
@@ -151,8 +145,8 @@ class Database{
             await this.query(query,[urlPath, userId])
             return true
         } catch (error) {
-            console.log("Error unsaving job from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.UpdateProfilePicture.name}()`)
         }
     }
 
@@ -186,8 +180,8 @@ class Database{
         await this.query(query, values);
         return true;
     } catch (error) {
-        console.log("Error creating new job post:", error);
-        throw new Error("Database error");
+        let error_ = error as Error
+        throw DatabaseCatchError(error_, `database/${this.CreateJob.name}()`)
     }
     }
   
@@ -197,8 +191,8 @@ class Database{
             let results = await this.query(query, [userId])
             return results
         } catch (error) {
-            console.log("Error getting saved jobs from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetSavedJobs.name}()`)
         }
     }  
 
@@ -208,8 +202,8 @@ class Database{
             let results = await this.query(query, [userId, offset])
             return results
         } catch (error) {
-            console.log("Error getting saved jobs from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetCreatedJobs.name}()`)
         }
     }  
 
@@ -229,8 +223,8 @@ class Database{
             await this.query(query, [jobId,userId])
             return true
         } catch (error) {
-            console.log("Error deleting job", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.DeleteJob.name}()`)
         }
     } 
     
@@ -240,8 +234,8 @@ class Database{
             let results = await this.query(query,[jobId])
             return results[0]
         } catch (error) {
-            console.log("Error getting a job from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetJob.name}()`)
         }
     }
 
@@ -256,8 +250,8 @@ class Database{
             await this.query(query,[views + 1,jobId])
 
         } catch (error) {
-            console.log("Error getting a job from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.IncrementViewCounter.name}()`)
         }
     }
 
@@ -305,8 +299,8 @@ class Database{
         return results;
 
     } catch (error) {
-        console.log("Error getting all jobs with filters from DB", error);
-        throw new Error("Database error");
+        let error_ = error as Error
+        throw DatabaseCatchError(error_, `database/${this.GetAllJobs.name}()`)
     }
 
 }
@@ -318,8 +312,8 @@ class Database{
             let formattedResults = results.map((object: any ) => object.jobId)
             return formattedResults
         } catch (error) {
-            console.log("Error getting all saved jobs ids from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.GetAllSavedJobIds.name}()`)
         }
     }
 
@@ -329,8 +323,8 @@ class Database{
             await this.query(query, [userId, jobId])
             return true
         } catch (error) {
-            console.log("Error saving job to db", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.SaveJob.name}()`)
         }
     }
 
@@ -340,8 +334,8 @@ class Database{
             await this.query(query,[userId, jobId])
             return true
         } catch (error) {
-            console.log("Error unsaving job from DB", error)
-            throw Error("Database error")
+            let error_ = error as Error
+            throw DatabaseCatchError(error_, `database/${this.UnSaveJob.name}()`)
         }
     }
 

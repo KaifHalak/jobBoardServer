@@ -4,7 +4,7 @@ import path from "path";
 
 import config from "../../config/loggerSettings";
 
-type TLogger = Exclude<keyof typeof config, "master">
+
 
 class Logger {
 
@@ -14,10 +14,10 @@ class Logger {
         this.LOGGER_WRITE_TO_FILE_PATH = path.join(__dirname, "allLogs.log")
     }
 
-    private Main(level:TLogger, message: string | Error = "No message", payload: Record<string, any> = {}){ 
+    private Main(level:TLoggerEvents, message: string | Error = "No message", payload: Record<string, any> = {}){ 
 
         if (message instanceof Error){
-            message = message.stack!
+            message = message.stack!.replace("Error: ", "\n")
         }
 
         // Output to console only if the master setting is set to TRUE
@@ -33,7 +33,7 @@ class Logger {
 
     }   
 
-    private OutputToConsole(level: TLogger, message: string | Error, payload: Record<string, any> = {}){
+    private OutputToConsole(level: TLoggerEvents, message: string | Error, payload: Record<string, any> = {}){
 
         // Output to console only if that LEVEL setting (ex. EVENT, FATAL etc) is set to TRUE
         if (!config[level].console){
@@ -61,7 +61,7 @@ class Logger {
 
     }
 
-    private WriteToFile(level: TLogger, message: string | Error, payload: Record<string, any> = {}){
+    private WriteToFile(level: TLoggerEvents, message: string | Error, payload: Record<string, any> = {}){
         
         try {
 
@@ -113,32 +113,34 @@ class Logger {
 
 
 
-    public Events(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public events(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("events", message, payload)
     }
 
-    public Error(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public error(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("error", message, payload)
     }
 
-    public Fatal(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public fatal(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("fatal", message, payload)
     }
 
-    public Debug(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public debug(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("debug", message, payload)
     }
     
-    public Warn(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public warn(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("warn", message, payload)
     }
 
-    public Database(message: string | Error = "No message", payload: Record<string, any> = {}){
+    public database(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("database", message, payload)
     }
 
 }
 
 
+type TLoggerEvents = Exclude<keyof typeof config, "master">
+
 const logger = new Logger()
-export default logger
+export { logger, TLoggerEvents }
