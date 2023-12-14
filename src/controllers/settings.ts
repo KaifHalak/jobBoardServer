@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express"
 import path from "path"
 import fs from "fs"
 
-import { interfaceExpress } from "@utils/types/authTypes"
+import { CustomRequest } from "@utils/interfaces/authTypes"
 import { ServerError, CustomError } from "@middlewares/globalErrorHandling";
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
 import db from "@utils/database"
@@ -10,13 +10,14 @@ import logger from "@utils/logger/dataLogger";
 import { ValidateEmail, ValidatePassword, ValidateUsername } from "@utils/validators";
 
 
-
+// Function:
+// Settings Page UI and its related operations
 
 const SETTINGS_PAGE = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "settingsUI", "index")
 const TEMP_IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "temp")
 const FINAL_IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "final")
 
-export async function GETSettings(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function GETSettings(req: CustomRequest, res: Response, next: NextFunction){
 
     let userId = req.userId!
     let userIp = req.ip!
@@ -25,12 +26,14 @@ export async function GETSettings(req: interfaceExpress.customRequest, res: Resp
         let { username, email } = await db.GetUserEmailAndUsername(userId)
         let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
 
+        // If user doesnt have a profile pic set, set it to the default one
         if (!profilePicUrlPath){
             profilePicUrlPath = "default.png"
         }
 
         let profilePicFullURLPath = path.join(FINAL_IMAGE_FILE_PATH, profilePicUrlPath)
         
+        // convert image to base64 url
         const contents = fs.readFileSync(profilePicFullURLPath)
         const b64 = contents.toString('base64')
         const type = "png"
@@ -38,6 +41,7 @@ export async function GETSettings(req: interfaceExpress.customRequest, res: Resp
         logger.Events("GETSettings successfull", {userId, userIp})
 
         return res.render(SETTINGS_PAGE,{username, email, profilePic: `data:${type};base64,${b64}`})
+
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error getting settings page: GETSettings"
@@ -48,7 +52,7 @@ export async function GETSettings(req: interfaceExpress.customRequest, res: Resp
 
 
 
-export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTUpdateEmail(req: CustomRequest, res: Response, next: NextFunction){
     
     let userId = req.userId!
     let userIp = req.ip!
@@ -69,17 +73,22 @@ export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: 
             return CustomError(req, res, next)("'passsword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
-        if (!(ValidatePassword(password))){
-            logger.Events("Incorrect password format: POSTUpdateEmail", {userId, userIp})
-            return CustomError(req, res, next)("Password must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
+        let validateResult: boolean | {error: string}
+        validateResult = ValidatePassword(password)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
-        if (!ValidateEmail(newEmail)){
-            logger.Events("Incorrect email format: POSTUpdateEmail", {userId, userIp})
-            return CustomError(req, res, next)("Incorrect email format", HttpStatusCodes.BAD_REQUEST)
+        validateResult = ValidateEmail(newEmail)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTUpdateEmail`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         let result = await db.UpdateUserEmail(newEmail, userId, password)
+
+        // if password is incorrect
 
         if (!result){
             logger.Events("Incorrect password: POSTUpdateEmail", {userId, userIp})
@@ -101,7 +110,7 @@ export async function POSTUpdateEmail(req: interfaceExpress.customRequest, res: 
 
 }
 
-export async function POSTUpdatePassword(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTUpdatePassword(req: CustomRequest, res: Response, next: NextFunction){
     
     let userId = req.userId!
     let userIp = req.ip!
@@ -122,18 +131,30 @@ export async function POSTUpdatePassword(req: interfaceExpress.customRequest, re
             return CustomError(req, res, next)("'newPassword' missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
-        if (!ValidatePassword(newPassword) || !(ValidatePassword(currentPassword))){
-            logger.Events("Incorrect password format: POSTUpdatePassword", {userId, userIp})
-            return CustomError(req, res, next)("Password must be atleast 6 characters long", HttpStatusCodes.BAD_REQUEST)
+        let validateResult: boolean | {error: string}
+
+        validateResult = ValidatePassword(newPassword)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
+        }
+
+        validateResult = ValidatePassword(currentPassword)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTUpdatePassword`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
         let result = await db.UpdateUserPassword(currentPassword, newPassword, userId)
+
+        // if password is incorrect
 
         if (!result){
             logger.Events("Incorrect password: POSTUpdatePassword", {userId, userIp})
             return CustomError(req, res, next)("Incorrect password", HttpStatusCodes.UNAUTHORIZED)
 
         }
+
         logger.Events("Password updated successfully: POSTUpdatePassword", {userId, userIp})
         return res.send({status: "Password updated successfully"})
 
@@ -149,7 +170,7 @@ export async function POSTUpdatePassword(req: interfaceExpress.customRequest, re
 
 }
 
-export async function POSTUpdateUsername(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTUpdateUsername(req: CustomRequest, res: Response, next: NextFunction){
 
     let userId = req.userId!
     let userIp = req.ip!
@@ -159,7 +180,7 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
 
         let result = ValidateUsername(newUsername)
         if (result != true){
-            logger.Events("Invalid username: POSTUpdateUsername", {userId, userIp})
+            logger.Events(`${result.error}: POSTUpdateUsername`, {userId, userIp})
             return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
         }
 
@@ -179,19 +200,22 @@ export async function POSTUpdateUsername(req: interfaceExpress.customRequest, re
 
 }
 
-export async function POSTUpdateProfilePic(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTUpdateProfilePic(req: CustomRequest, res: Response, next: NextFunction){
 
     let userId = req.userId!
     let userIp = req.ip!  
 
     try {
 
-        let { fileStatus } = req.body as {fileStatus: string}
+        let { fileStatus } = req.body as {fileStatus: "start" | "in-progress" | "end"}
 
         let fileName = `${userId}.png`
         
         let tempImageFilePath = path.join(TEMP_IMAGE_FILE_PATH, fileName)
         let finalImageFilePath = path.join(FINAL_IMAGE_FILE_PATH, fileName)
+
+        // Initially, the image will be stored in a temp folder.
+        // Once all of the image bytes are recieved, the image is moved to "final" folder
 
         switch (fileStatus) {
 
@@ -220,6 +244,8 @@ export async function POSTUpdateProfilePic(req: interfaceExpress.customRequest, 
                 writeStream.on("finish", async () => {
                     fs.unlink(tempImageFilePath, () => {})
 
+                    // Multer will store the bytes in memory.
+                    // Free up memory when the whole image is recieved
                     delete req.file
 
                     await db.UpdateProfilePicture(userId, fileName)
@@ -236,7 +262,7 @@ export async function POSTUpdateProfilePic(req: interfaceExpress.customRequest, 
         
     } catch (error) {
         let error_ = error as Error
-
+        // Come back later
         switch (error_.message) {
             case "chunk error":
                 error_.message = "resend chunk"

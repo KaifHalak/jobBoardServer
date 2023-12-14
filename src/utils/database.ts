@@ -1,7 +1,7 @@
 import mysql from "mysql2"
 import env from "./env"
 import util from "util"
-import { JobDetails } from "@utils/types/jobsTypes";
+import { JobDetails } from "@utils/interfaces/jobsTypes";
 
 
 interface filters{
@@ -101,7 +101,7 @@ class Database{
 
     async GetUsername( userId: string ){
         try {
-            let query = `SELECT username FROM users WHERE userId = ?`
+            let query = `SELECTs username FROM users WHERE userId = ?`
             let results = await this.query(query,[userId])
             return results[0]["username"]
         } catch (error) {

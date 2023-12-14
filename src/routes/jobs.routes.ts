@@ -11,10 +11,10 @@ router.get("/saved", GETSavedJobsPage)
 router.post("/save", POSTSaveJob)
 router.post("/unsave", POSTUnSaveJob)
 
-import { GETYourJobsPage, POSTDeleteJob, POSTGetMoreYourJobs } from "@controllers/yourJobs"
-router.get("/created",GETYourJobsPage)
+import { GETUsersJobPostsPage, POSTDeleteJob, POSTGetMoreUsersJobs } from "@controllers/yourJobs"
+router.get("/created",GETUsersJobPostsPage)
 router.post("/delete",POSTDeleteJob)
-router.post("/created",POSTGetMoreYourJobs)
+router.post("/created",POSTGetMoreUsersJobs)
 
 
 import GETViewJob from "@controllers/viewJobs"

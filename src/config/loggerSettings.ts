@@ -1,6 +1,21 @@
-let config = {
-    all: {
-        color: "", // Ignore this
+import { ForegroundColor } from "chalk";
+
+type TAllLevels = "master" | "events" | "error" | "fatal" | "debug" | "warn" | "database"
+
+interface IEachLevel {
+    color?: typeof ForegroundColor,
+    saveToFile: boolean,
+    console: boolean
+}
+
+type IConfig = {
+    [key in TAllLevels]: IEachLevel;
+};
+
+
+
+let config: IConfig = {
+    master: {
         saveToFile: true,
         console: true
     },

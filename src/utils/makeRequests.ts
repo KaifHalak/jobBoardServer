@@ -1,5 +1,8 @@
 type Methods = "GET" | "POST" | "PATCH" | "DELETE" 
 
+// Function
+// Easily make HTTP requests when testing
+
 export default async function MakeRequest(url: string,method: Methods, payload: Record<any,any>, cookie: string = ""){
     
     let headers = {

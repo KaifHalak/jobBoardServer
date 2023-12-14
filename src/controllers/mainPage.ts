@@ -3,22 +3,22 @@ import path from "path"
 import fs from "fs"
 
 import { ServerError } from "@middlewares/globalErrorHandling";
-import { interfaceExpress } from "@utils/types/authTypes";
+import { CustomRequest } from "@utils/interfaces/authTypes";
 import { JobTypes, Locations  } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
 import { VerifyToken } from "@utils/security/jwtToken";
 
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../",  "jobBoardClient", "public", "mainUI", "index")
-const JOB_TYPES = Object.values(JobTypes)
-const COUNTRIES = Locations
+// Function:
+// MAIN page UI and its related operations
 
+
+const MAIN_PAGE_UI_PATH = path.join(__dirname, "../", "../", "../",  "jobBoardClient", "public", "mainUI", "index")
 const IMAGE_FILE_PATH = path.join(__dirname, "../", "../","jobBoardUserImages", "final")
 
 
 interface filters{
-    // [key: string]: string | undefined;
     role?: string,
     country?: string,
     city?: string,
@@ -29,11 +29,11 @@ interface filters{
 
 
 
-export async function GETMainPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function GETMainPage(req: CustomRequest, res: Response, next: NextFunction){
     
     let token = req.cookies["sessionToken"]
     let userId = VerifyToken(token)?.userId
-    let userIp = req.ip!
+    let userIp = req.ip
     let filters: filters = {}
 
     try {
@@ -43,9 +43,13 @@ export async function GETMainPage(req: interfaceExpress.customRequest, res: Resp
 
         let fullProfilePicUrlPath: string , username: string
 
+        // If user is logged in
         if (userId){
+
             let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
             
+            // If user doesnt have a profile pic set, set it to the default on
+
             if (!profilePicUrlPath){
                 fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, "default.png")
             }
@@ -53,19 +57,36 @@ export async function GETMainPage(req: interfaceExpress.customRequest, res: Resp
                 fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, profilePicUrlPath)
             }
             username = await db.GetUsername(userId)
-        } else {
+        } 
+        else {
+            // Set the profile pic to the default one if the user is not logged in
             fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, "default.png")
             username = "Login"
         }
 
+        // convert image to base64 url
         const contents = fs.readFileSync(fullProfilePicUrlPath)
         const b64 = contents.toString('base64')
         const type = "png"
-        
-        // let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
 
-        logger.Events("GETMainPage successfull", {userId, userIp, filters})
-        return res.render(FILE_PATH, {allJobs, allSavedJobIds, jobTypes: JOB_TYPES, countries: COUNTRIES, filters, profilePic: `data:${type};base64,${b64}`, username})
+        logger.Events("GETMainPage successfull", {userId, userIp})
+
+
+        // allJobs: Information about job posts
+
+        // allSavedJobIds: Either contains information about "saved" job posts or is set to FALSE. In this case, its set to FALSE
+
+        // jobTypes: Used for filtering (INTERNSHIP, CONTRACT, etc.)
+
+        // countries: Used for filtering (Pakistan, Turkey, etc.)
+
+        // filters: Contains the active filters. Used to display the selected filters when the page reloads.
+
+        // profilePic: base64 encoded profile pic of the user
+
+        // username: user's username
+
+        return res.render(MAIN_PAGE_UI_PATH, {allJobs, allSavedJobIds, jobTypes: Object.values(JobTypes), countries: Locations, filters, profilePic: `data:${type};base64,${b64}`, username})
 
     } catch (error) {
         let error_ = error as Error        
@@ -76,14 +97,16 @@ export async function GETMainPage(req: interfaceExpress.customRequest, res: Resp
 }
 
 
-export async function POSTGetMoreJobs(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTGetMoreJobs(req: CustomRequest, res: Response, next: NextFunction){
     
     let userId = req.userId!
     let userIp = req.ip!
     let filters: filters = {}
 
     try {
-        
+
+        // Get next set of jobs (by default, only 9 jobs will be shown)
+
         filters = req.query
         let {allJobs, allSavedJobIds} = await RetrieveJobData(filters, userId)
         
@@ -115,7 +138,7 @@ async function RetrieveJobData(filters: filters, userId: string | undefined){
 
     let allJobs = await db.GetAllJobs(filters)
 
-    // To allow users to see which jobs they have already saved on the main page (if logged in)
+    // To allow users to see which jobs they have already saved, on the main page (if logged in)
     let allSavedJobIds = []
     
     // If the user is logged in

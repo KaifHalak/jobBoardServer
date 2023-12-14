@@ -6,7 +6,7 @@ enum JobTypes {
     Remote = "Remote"
 }
 
-const Locations: InterfaceLocations = {  
+const Locations = {  
     "Japan": [
       "Osaka",
       "Nagoya",
@@ -1110,8 +1110,5 @@ const Locations: InterfaceLocations = {
 
 
 
-interface InterfaceLocations{
-  [key: string]: string[];
-}
 
 export {Locations, JobTypes}

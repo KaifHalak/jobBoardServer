@@ -1,14 +1,17 @@
 export function ValidateEmail(email: string){
     const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return pattern.test(email);
+    if (!pattern.test(email)){
+        return {error: "Incorrect email format"}
+    }
+    return true
 }
 
 export function ValidatePassword(password: string){
     let length = 6
-    if (password.length >= length){
-        return true
+    if (password.length < length){
+        return {error : "Password must be atleast 6 characters long"}
     }
-    return false
+    return true
 }
 
 export function ValidateUsername (username: string): true | {error: string} {

@@ -33,14 +33,18 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
             return CustomError(req, res, next)("Email and/or password missing from the body", HttpStatusCodes.BAD_REQUEST)
         }
 
-        if (!ValidateEmail(email)){
-            logger.Events("Invalid email: POSTLogin", {userId, userIp})
-            return CustomError(req, res, next)("Invalid email format", HttpStatusCodes.BAD_REQUEST)
+        let validateResult: boolean | {error: string}
+
+        validateResult = ValidateEmail(email)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTLogin`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
-    
-        if (!ValidatePassword(password)){
-            logger.Events("Invalid password: POSTLogin", {userId, userIp})
-            return CustomError(req, res, next)("Password must be atleast 6 characters long",  HttpStatusCodes.BAD_REQUEST)
+
+        validateResult = ValidatePassword(password)
+        if (validateResult !== true){
+            logger.Events(`${validateResult.error}: POSTLogin`, {userId, userIp})
+            return CustomError(req, res, next)(validateResult.error,  HttpStatusCodes.BAD_REQUEST)
         }
 
 
@@ -52,6 +56,7 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
         return CustomError(req, res, next)("Incorrect email and/or password", HttpStatusCodes.UNAUTHORIZED)
     }
 
+    // Login successful
     let token = CreateToken(userId)
     AddCookie(res, token)
     logger.Events("User logged in successfully: POSTLogin", {userId, userIp})
@@ -83,20 +88,24 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
         return CustomError(req, res, next)("Email and/or username and/or password missing from the body", HttpStatusCodes.BAD_REQUEST)
     }
 
-    let result = ValidateUsername(username)
-    if (result !== true){
-        logger.Events("Invalid username: POSTSignUp", {userId, userIp})
-        return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
+    let validateResult: boolean | {error: string}
+
+    validateResult = ValidateUsername(username)
+    if (validateResult !== true){
+        logger.Events(`${validateResult.error}: POSTSignUp`, {userId, userIp})
+        return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
     }
 
-    if (!ValidateEmail(email)){
-        logger.Events("Invalid email: POSTSignUp", {userId, userIp})
-        return CustomError(req, res, next)("Invalid email format", HttpStatusCodes.BAD_REQUEST)
+    validateResult = ValidateEmail(email)
+    if (validateResult !== true){
+        logger.Events(`${validateResult.error}: POSTSignUp`, {userId, userIp})
+        return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
     }
 
-    if (!ValidatePassword(password)){
-        logger.Events("Invalid password: POSTSignUp", {userId, userIp})
-        return CustomError(req, res, next)(`Password must be atleast 6 characters long`,HttpStatusCodes.BAD_REQUEST)
+    validateResult = ValidatePassword(password)
+    if (validateResult !== true){
+        logger.Events(`${validateResult.error}: POSTSignUp`, {userId, userIp})
+        return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
     }
 
     userId = await db.CheckIfUserExists(email)

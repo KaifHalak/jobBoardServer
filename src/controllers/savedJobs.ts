@@ -1,14 +1,19 @@
 import { Response, NextFunction } from "express"
 import path from "path"
 
-import { ServerError } from "@middlewares/globalErrorHandling";
-import { interfaceExpress } from "@utils/types/authTypes";
+import { CustomError, ServerError } from "@middlewares/globalErrorHandling";
+import { CustomRequest } from "@utils/interfaces/authTypes";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
+import httpStatusCodes from "@utils/enums/httpStatusCodes";
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "savedJobsUI", "index.ejs")
+// Function
+//  Saved Jobs UI and its related operations
 
-export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+
+const SAVED_JOBS_UI_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "savedJobsUI", "index.ejs")
+
+export async function GETSavedJobsPage(req: CustomRequest, res: Response, next: NextFunction){
 
     let userId = req.userId!
     let userIp = req.ip!
@@ -18,7 +23,13 @@ export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res:
 
         logger.Events("GETSavedJobsPage successfully: GETSavedJobsPage", {userId, userIp})
 
-        return res.render(FILE_PATH, {allJobs, allSavedJobIds: false, deleteJobs: false})
+        // allJobs: Information about job posts
+
+        // allSavedJobIds: Either contains information about "saved" job posts or is set to FALSE. In this case, it is FALSE (no saved jobs posts)
+
+        // When deleteJobs is FALSE, the "save" / "unsave" button will appear on the UI instead of the "delete job" button.
+
+        return res.render(SAVED_JOBS_UI_PATH, {allJobs, allSavedJobIds: false, deleteJobs: false})
 
     } catch (error) {
         let error_ = error as Error
@@ -30,7 +41,7 @@ export async function GETSavedJobsPage(req: interfaceExpress.customRequest, res:
 }
 
 
-export async function POSTSaveJob(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTSaveJob(req: CustomRequest, res: Response, next: NextFunction){
     
     let userId = req.userId!
     let userIp = req.ip!
@@ -48,9 +59,10 @@ export async function POSTSaveJob(req: interfaceExpress.customRequest, res: Resp
 
         if (!job){
             logger.Events("Job does not exist: POSTSaveJob", {userId, userIp, jobId})
-            return res.send({error: "Job does not exist"})
+            return CustomError(req, res, next)("Job does not exist", httpStatusCodes.BAD_REQUEST)
         }
 
+        // Save job to user's account only if the job exists
         await db.SaveJob(userId, jobId)
 
         logger.Events("Job saved successfully: POSTSaveJob", {userId, userIp, jobId})
@@ -58,18 +70,15 @@ export async function POSTSaveJob(req: interfaceExpress.customRequest, res: Resp
         return res.send({status:"Job saved successfully"})
 
     } catch (error) {
-        
-        if (error instanceof Error){
-            error.message = "Error saving job: POSTSaveJob"
-            logger.Error(error, {userId, userIp, jobId})
-        }
-
+        let error_ = error as Error
+        error_.message = "Error saving job: POSTSaveJob"
+        logger.Error(error_, {userId, userIp})
         ServerError(req, res, next)()
     }   
 
 }
 
-export async function POSTUnSaveJob(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTUnSaveJob(req: CustomRequest, res: Response, next: NextFunction){
     
     let userId = req.userId!
     let userIp = req.ip!
@@ -82,8 +91,10 @@ export async function POSTUnSaveJob(req: interfaceExpress.customRequest, res: Re
 
         if (!job){
             logger.Events("Job does not exist: POSTUnSaveJob", {userId, userIp, jobId})
-            return res.send({error: "Job does not exist"})
+            return CustomError(req, res, next)("Job does not exist", httpStatusCodes.BAD_REQUEST)
         }
+
+        // Unsave job to user's account only if the job exists
 
         await db.UnSaveJob(userId, jobId)
 
@@ -92,12 +103,9 @@ export async function POSTUnSaveJob(req: interfaceExpress.customRequest, res: Re
         return res.send({status:"Job unsaved successfully"})
 
     } catch (error) {
-        
-        if (error instanceof Error){
-            error.message = "Error unsaving job: POSTUnSaveJob"
-            logger.Error(error, {userId, userIp, jobId})
-        }
-
+        let error_ = error as Error
+        error_.message = "Error unsaving job: POSTUnSaveJob"
+        logger.Error(error_, {userId, userIp})
         ServerError(req, res, next)()
     }   
 

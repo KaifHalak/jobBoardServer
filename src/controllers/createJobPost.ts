@@ -1,35 +1,42 @@
-import { Request, Response, NextFunction } from "express"
+import { Response, NextFunction } from "express"
 import path from "path"
 
 import { CustomError, ServerError } from "@middlewares/globalErrorHandling";
 import HttpStatusCodes from "@utils/enums/httpStatusCodes";
-import { JobDetails } from "@utils/types/jobsTypes";
-import { interfaceExpress } from "@utils/types/authTypes";
+import { JobDetails } from "@utils/interfaces/jobsTypes";
+import { CustomRequest } from "@utils/interfaces/authTypes";
 import { JobTypes, Locations } from "@utils/enums/jobPostDetails";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
 import { ValidateEmail } from "@utils/validators";
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "createJobPostUI", "index")
 
-// Send user the file
-export async function GETCreateJobPostPage(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+// Function:
+// CreateJobPost UI and its related operations
+
+const CREATE_JOB_POST_UI_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "createJobPostUI", "index")
+
+
+export async function GETCreateJobPostPage(req: CustomRequest, res: Response, next: NextFunction){
+
+    // Send user the file
     let userIp = req.ip
     let userId = req.userId
     logger.Events("GETCreateJobPostPage successfull", {userIp, userId})
 
-    let countries = Locations
-    res.render(FILE_PATH,{countries})
+    res.render(CREATE_JOB_POST_UI_PATH,{countries: Locations})
+
 }
 
 
 // Create the job post
-export async function POSTCreateJobPost(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export async function POSTCreateJobPost(req: CustomRequest, res: Response, next: NextFunction){
     
     let userIp = req.ip!
     let userId = req.userId!
 
     try {
+        // Contains info about the Job Post such as Title, Job Description, Job Requirements etc
         let payload: JobDetails =  req.body
         let validation = ValidatePayload(payload)
 
@@ -45,11 +52,9 @@ export async function POSTCreateJobPost(req: interfaceExpress.customRequest, res
         return res.send({status:"Success"})
 
     } catch (error) {
-
-        if (error instanceof Error){
-            error.message = "Error creating job post: POSTCreateJobPost"
-            logger.Error(error, {userId, userIp})
-        }
+        let error_ = error as Error
+        error_.message = "Error creating job post: POSTCreateJobPost"
+        logger.Error(error_, {userId, userIp})
         ServerError(req, res, next)()
     }
 }
@@ -120,7 +125,7 @@ function ValidatePayload(payload: JobDetails){
     // deadline
     let datePattern = /^\d{4}-\d{2}-\d{2}$/
     if ( !(datePattern.test(payload.applicationDeadline)) ){
-        return {error: "Incorrect application deadline value"} 
+        return {error: "Incorrect application deadline"} 
     }
 
     // compensation
@@ -135,10 +140,10 @@ function ValidatePayload(payload: JobDetails){
     }
 
 
-
     // email
-    if ( !(ValidateEmail(payload.email)) ){
-        return {error: "Incorrect email format. Please follow the example given"}
+    let validateResult = ValidateEmail(payload.email)
+    if ( validateResult !== true ){
+        return {error: validateResult.error}
     }
 
     // phone
@@ -175,7 +180,8 @@ function ValidatePayload(payload: JobDetails){
     }
 
     //city
-    let country = payload.country.toLowerCase().charAt(0).toUpperCase() + payload.country.slice(1)
+    let country = payload.country.toLowerCase().charAt(0).toUpperCase() + payload.country.slice(1) as keyof typeof Locations
+
     let cities = Locations[country] as string[]
 
     if ( !(cities.includes(payload.city)) ){

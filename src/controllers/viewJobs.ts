@@ -1,20 +1,22 @@
 import { Response, NextFunction } from "express"
 import path from "path"
 
+import { CustomError } from "@middlewares/globalErrorHandling";
+import httpStatusCodes from "@utils/enums/httpStatusCodes";
 import { ServerError } from "@middlewares/globalErrorHandling";
-import { interfaceExpress } from "@utils/types/authTypes";
+import { CustomRequest } from "@utils/interfaces/authTypes";
 import db from "@utils/database";
 import logger from "@utils/logger/dataLogger";
-
 
 
 // Function:
 // View a more detailed version of a job posting
 
 
-const FILE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "viewJobPostUI", "index.ejs")
+const VIEW_JOB_POST_UI_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "viewJobPostUI", "index.ejs")
+const PAGE_NOT_FOUND_UI_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClient", "public", "pageNotFoundUI", "index.html")
 
-export default async function GETViewJob(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export default async function GETViewJob(req: CustomRequest, res: Response, next: NextFunction){
 
     let userId = req.userId!
     let userIp = req.ip!
@@ -24,7 +26,7 @@ export default async function GETViewJob(req: interfaceExpress.customRequest, re
 
         if (!Number(jobId)){
             logger.Events("Job id not a number: GETViewJob", {userId, userIp, jobId})
-            return res.send({error:"Incorrect job id"})
+            return CustomError(req, res, next)("Incorrect job id", httpStatusCodes.BAD_REQUEST)
         }
         
         await db.IncrementViewCounter(jobId)
@@ -33,12 +35,12 @@ export default async function GETViewJob(req: interfaceExpress.customRequest, re
         // Job doesnt exist
         if (!jobInfo){
             logger.Events("Job does not exist: GETViewJob", {userId, userIp, jobId})
-            return res.send({error: "Job does not exist"})
+            return res.status(404).sendFile(PAGE_NOT_FOUND_UI_PATH)
         }
 
         logger.Events("GETViewJob successfull", {userId, userIp, jobId})
 
-        return res.render(FILE_PATH, {jobInfo})
+        return res.render(VIEW_JOB_POST_UI_PATH, {jobInfo})
     } catch (error) {
         let error_ = error as Error
         error_.message = "Error GETViewJob"

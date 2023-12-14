@@ -4,35 +4,38 @@ import path from "path";
 
 import config from "../../config/loggerSettings";
 
-type TLogger = keyof typeof config
-type TPayload = {[key: string]: any}
+type TLogger = Exclude<keyof typeof config, "master">
 
 class Logger {
 
+    private LOGGER_WRITE_TO_FILE_PATH: string
 
-    private Main(level:TLogger, message: string | Error = "No message", payload: TPayload = {}){ 
+    constructor(){
+        this.LOGGER_WRITE_TO_FILE_PATH = path.join(__dirname, "allLogs.log")
+    }
 
-        if ( !(level && level in config) ){
-            throw Error(`Incorrect value for level: ${level}`)
-        }
+    private Main(level:TLogger, message: string | Error = "No message", payload: Record<string, any> = {}){ 
 
         if (message instanceof Error){
             message = message.stack!
         }
 
-        if (config["all"].console){
+        // Output to console only if the master setting is set to TRUE
+        if (config["master"].console){
             this.OutputToConsole(level, message, payload)
         }
 
-        if (config["all"].saveToFile){
+        // Save to file only if the master setting is set to TRUE
+        if (config["master"].saveToFile){
             this.WriteToFile(level, message, payload)
         }
 
 
     }   
 
-    private OutputToConsole(level: TLogger, message: string | Error, payload: TPayload = {}){
+    private OutputToConsole(level: TLogger, message: string | Error, payload: Record<string, any> = {}){
 
+        // Output to console only if that LEVEL setting (ex. EVENT, FATAL etc) is set to TRUE
         if (!config[level].console){
             return
         }
@@ -40,9 +43,15 @@ class Logger {
         let color = config[level].color as typeof chalk.Color
         let chalkInstance = chalk[color]
 
+        //Ex: 12/12/2023, 5:26:23 PM
         let timeStamp = this.FormatTimestamp()
 
-        let formattedPayload
+        let formattedPayload = {}
+        
+        // If a payload has been passed (extra info about the situation such as the userId), then format it.
+        // Ex: 
+        // payload = {userId: 5, userIp: 159.89.173.104}
+        // formattedPayload = [userId: 5][userIp: 159.89.173.104]
 
         if (payload){
             formattedPayload = this.FormatPayload(payload, chalkInstance)
@@ -52,19 +61,26 @@ class Logger {
 
     }
 
-    private WriteToFile(level: TLogger, message: string | Error, payload: TPayload = {}){
+    private WriteToFile(level: TLogger, message: string | Error, payload: Record<string, any> = {}){
         
         try {
+
+            // Save to file only if that LEVEL setting (ex. EVENT, FATAL etc) is set to TRUE
             if (!config[level].saveToFile){
                 return
             }
-    
+            
+            //Ex: 12/12/2023, 5:26:23 PM
             let timeStamp = this.FormatTimestamp()
-            const filePath = path.join(__dirname, "allLogs.log")
-    
-            let data = {level: level.toUpperCase(), timeStamp, data: payload!, message}
-    
+            const filePath = this.LOGGER_WRITE_TO_FILE_PATH
+            
+            if (!fs.existsSync(this.LOGGER_WRITE_TO_FILE_PATH)){
+                fs.writeFileSync(this.LOGGER_WRITE_TO_FILE_PATH, "\n")
+            }
+
+            let data = {level: level.toUpperCase(), timeStamp, data: payload, message}
             fs.appendFileSync(filePath, JSON.stringify(data) + "\n")
+
         } catch (error: any) {
             if (error instanceof Error){
                 error.message = "Error writing log to file."
@@ -75,11 +91,18 @@ class Logger {
 
     }
 
+
+
     private FormatTimestamp(){
+        //Ex: 12/12/2023, 5:26:23 PM
         return new Date().toLocaleString()
     }
 
-    private FormatPayload(payload: {[key: string]: any}, chalkInstance: chalk.Chalk){
+    private FormatPayload(payload: Record<string, any>, chalkInstance: chalk.Chalk){
+        // Ex: 
+        // payload = {userId: 5, userIp: 159.89.173.104}
+        // formattedPayload = [userId: 5][userIp: 159.89.173.104]
+
         let output = ""
         Object.keys(payload).forEach((key) => {
             let value = payload[key]
@@ -90,29 +113,27 @@ class Logger {
 
 
 
-    public Events(message: string | Error = "No message", payload: TPayload = {}){
+    public Events(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("events", message, payload)
     }
 
-    public Error(message: string | Error = "No message", payload: TPayload = {}){
+    public Error(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("error", message, payload)
     }
 
-    public Fatal(message: string | Error = "No message", payload: TPayload = {}){
+    public Fatal(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("fatal", message, payload)
     }
 
-    public Debug(message: string | Error = "No message", payload: TPayload = {}){
+    public Debug(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("debug", message, payload)
     }
     
-    
-    public Warn(message: string | Error = "No message", payload: TPayload = {}){
+    public Warn(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("warn", message, payload)
     }
 
-    
-    public Database(message: string | Error = "No message", payload: TPayload = {}){
+    public Database(message: string | Error = "No message", payload: Record<string, any> = {}){
         this.Main("database", message, payload)
     }
 

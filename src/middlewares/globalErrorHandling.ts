@@ -1,6 +1,8 @@
 import  HttpStatusCodes  from "../utils/enums/httpStatusCodes";
 import { Request, Response, NextFunction } from "express"
 
+// Function:
+// Handle all errors
 
 export function ServerError(req: Request, res: Response, next: NextFunction){
     return () => {

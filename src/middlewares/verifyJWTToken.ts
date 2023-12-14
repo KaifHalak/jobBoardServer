@@ -1,20 +1,21 @@
-import { Request, Response, NextFunction } from "express"
+import { Response, NextFunction } from "express"
 
 import { VerifyToken } from "@utils/security/jwtToken";
-import { interfaceExpress } from "@utils/types/authTypes";
+import { CustomRequest } from "@utils/interfaces/authTypes";
 import logger from "@utils/logger/dataLogger";
 
 // Function:
 // Verify JWT Token for authentication.
 
-export default function VerifyJWTToken(req: interfaceExpress.customRequest, res: Response, next: NextFunction){
+export default function VerifyAndProcessJWTToken(req: CustomRequest, res: Response, next: NextFunction){
+
     let token = req.cookies["sessionToken"] as string
     let payload = VerifyToken(token)
 
-    let timeRemainingMin = TimeRemainingBeforeExpMin(payload?.exp!)
+    let timeRemainingInMin = TimeRemainingBeforeExpMin(payload?.exp!)
 
-    // If token invalid or expired or 2 minutes are remaining
-    if (!payload || timeRemainingMin < 2){
+    // If token is invalid or expired or 2 minutes are remaining before expiration
+    if (!payload || timeRemainingInMin < 2){
 
         logger.Events("User unauthorized: VerifyJWTToken", {userIp: req.ip!})
 
@@ -30,16 +31,14 @@ export default function VerifyJWTToken(req: interfaceExpress.customRequest, res:
 
     }
 
-    req.userId = payload?.userId
-    logger.Events("User authorized: VerifyJWTToken", {userId: req.userId, userIp: req.ip!})
+    req.userId = payload!.userId
+    logger.Events("User authorized: VerifyJWTToken", {userId: req.userId, userIp: req.ip})
     return next()
 }
 
 
 
 function TimeRemainingBeforeExpMin(exp: number){
-
     let currentTimeMin = (new Date().getTime() / 1000) / 60
     return exp - currentTimeMin
-
 }
