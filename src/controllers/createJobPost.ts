@@ -46,7 +46,11 @@ export async function POSTCreateJobPost(req: CustomRequest, res: Response, next:
         }
     
         // Create job post in DB
-        await db.CreateJob(payload, userId)
+        let outcome = (await db.CreateJob(payload, userId)).changedRows
+
+        if (outcome > 1){
+            throw Error("changedRows > 1")
+        }
 
         logger.events("Job post created successfully: POSTCreateJobPost", {userId, userIp, payload})
         return res.send({status:"Success"})

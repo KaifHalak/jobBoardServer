@@ -46,8 +46,8 @@ export async function GETMainPage(req: CustomRequest, res: Response, next: NextF
         // If user is logged in
         if (userId){
 
-            let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
-            
+            let profilePicUrlPath  = (await db.GetUserProfilePicURLPath(userId)).profilePicPath
+            console.log(profilePicUrlPath)
             // If user doesnt have a profile pic set, set it to the default on
 
             if (!profilePicUrlPath){
@@ -56,7 +56,7 @@ export async function GETMainPage(req: CustomRequest, res: Response, next: NextF
             else {
                 fullProfilePicUrlPath = path.join(IMAGE_FILE_PATH, profilePicUrlPath)
             }
-            username = await db.GetUsername(userId)
+            username = (await db.GetUsername(userId)).username
         } 
         else {
             // Set the profile pic to the default one if the user is not logged in
@@ -136,7 +136,7 @@ async function RetrieveJobData(filters: filters, userId: string | undefined){
     let allJobs = await db.GetAllJobs(filters)
 
     // To allow users to see which jobs they have already saved, on the main page (if logged in)
-    let allSavedJobIds = []
+    let allSavedJobIds: number[] = []
     
     // If the user is logged in
     if (userId){

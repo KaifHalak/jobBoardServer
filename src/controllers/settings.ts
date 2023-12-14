@@ -25,7 +25,7 @@ export async function GETSettings(req: CustomRequest, res: Response, next: NextF
 
     try {
         let { username, email } = await db.GetUserEmailAndUsername(userId)
-        let { profilePicUrlPath } = await db.GetUserProfilePicURLPath(userId)
+        let  profilePicUrlPath  = (await db.GetUserProfilePicURLPath(userId)).profilePicPath
 
         // If user doesnt have a profile pic set, set it to the default one
         if (!profilePicUrlPath){
@@ -85,9 +85,13 @@ export async function POSTUpdateEmail(req: CustomRequest, res: Response, next: N
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
-        let result = await db.UpdateUserEmail(newEmail, userId, password)
+        let result = (await db.UpdateUserEmail(newEmail, userId, password)).changedRows
 
         // if password is incorrect
+
+        if (result > 1){
+            throw Error("changedRows > 1")
+        }
 
         if (!result){
             logger.events("Incorrect password: POSTUpdateEmail", {userId, userIp})
@@ -142,7 +146,11 @@ export async function POSTUpdatePassword(req: CustomRequest, res: Response, next
             return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
         }
 
-        let result = await db.UpdateUserPassword(currentPassword, newPassword, userId)
+        let result = (await db.UpdateUserPassword(currentPassword, newPassword, userId)).changedRows
+
+        if (result > 1){
+            throw Error ("changedRows > 1")
+        }
 
         // if password is incorrect
 
@@ -179,7 +187,12 @@ export async function POSTUpdateUsername(req: CustomRequest, res: Response, next
             return CustomError(req, res, next)(result.error, HttpStatusCodes.BAD_REQUEST)
         }
 
-        await db.UpdateUserUsername(newUsername, userId!)
+        let outcome = (await db.UpdateUsername(newUsername, userId!)).changedRows
+
+        if (outcome > 1){
+            throw Error("changedRows > 1")
+        }
+
         logger.events("Username updated successfully: POSTUpdateUsername", {userId, userIp})
         return res.send({status: "Username updated successfully"})
 
@@ -241,7 +254,10 @@ export async function POSTUpdateProfilePic(req: CustomRequest, res: Response, ne
                     // Free up memory when the whole image is recieved
                     delete req.file
 
-                    await db.UpdateProfilePicture(userId, fileName)
+                    let outcome = (await db.UpdateProfilePicture(userId, fileName)).changedRows
+                    if (outcome > 1){
+                        throw Error("changedRows > 1")
+                    }
                 })
 
                 readStream.pipe(writeStream)

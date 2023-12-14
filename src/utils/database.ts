@@ -38,38 +38,38 @@ class Database{
             let query = `INSERT INTO users (email, password, username) VALUES (?, ?, ?)`
             let results = await this.query(query, [email, password, username])
             let { insertId } = results
-            return insertId 
+            return {userId: insertId }
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.SignupUser.name}()`)
         }
     }
 
-    async LoginUser(email: string, password: string):Promise<string | null>{
-
+    async LoginUser(email: string, password: string){
 
         try {
             let query = `SELECT userId FROM users WHERE email = ? AND password = ? `
             let result = await this.query(query, [email, password])
-            let userId  = result[0]?.userId || null
-            return userId
+            let userId: string | undefined  = result[0]?.userId
+            return { userId }
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.LoginUser.name}()`)
         }
     }
 
-    async CheckIfUserExists(email: string) : Promise<string | null>{
+    async CheckIfUserExists(email: string){
         try {
             let query = `SELECT userId FROM users WHERE email = ?`
             let results = await this.query(query, [email])
-            let userId = results[0]?.userId || null
-            return userId
+            let userId: string | undefined = results[0]?.userId
+            return { userId }
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.CheckIfUserExists.name}()`)
         }
     }
+
 
     async GetUserEmailAndUsername( userId: string ){
         try {
@@ -85,43 +85,44 @@ class Database{
     async GetUserProfilePicURLPath( userId: string ){
         try {
             let query = `SELECT profilePicUrlPath FROM users WHERE userId = ?`
-            let results = await this.query(query,[userId])
-            return results[0]
+            let profilePicPath = (await this.query(query,[userId]))[0].profilePicUrlPath as string
+            return {profilePicPath}
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.GetUserProfilePicURLPath.name}()`)
         }
     }
 
+
     async GetUsername( userId: string ){
         try {
-            let query = `SELECTs username FROM users WHERE userId = ?`
-            let results = await this.query(query,[userId])
-            return results[0]["username"]
+            let query = `SELECT username FROM users WHERE userId = ?`
+            let username = (await this.query(query,[userId]))[0].username as string
+            return {username}
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.GetUsername.name}()`)
         }
     }
     
-    async UpdateUserUsername(username: string, userId: string){
+    async UpdateUsername(username: string, userId: string){
         try {
             let query = `UPDATE users SET username = ? WHERE userId = ?`
-            await this.query(query, [username, userId])
-            return true
+            let changedRows = (await this.query(query, [username, userId])).changedRows as number
+            return {changedRows}
         } catch (error) {
             let error_ = error as Error
-            throw DatabaseCatchError(error_, `database/${this.UpdateUserUsername.name}()`)
+            throw DatabaseCatchError(error_, `database/${this.UpdateUsername.name}()`)
         }
     }
 
     async UpdateUserEmail(email: string, userId: string, password: string){
         try {
             let query = `UPDATE users SET email = ? WHERE userId = ? AND password = ?`
-            let results = await this.query(query, [email, userId, password])
-            return results.changedRows // either 0 (failed )or 1 (successful)
+            let changedRows = (await this.query(query, [email, userId, password])).changedRows as number
+            return {changedRows} // either 0 (failed) or 1 (success)
 
-        } catch (error) {
+        } catch (error) {  
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.UpdateUserEmail.name}()`)
         }
@@ -130,8 +131,8 @@ class Database{
     async UpdateUserPassword(currentPassword: string, newPassword: string ,userId: string){
         try {
             let query = `UPDATE users SET password = ? WHERE userId = ? AND password = ?`
-            let results = await this.query(query, [newPassword, userId, currentPassword])
-            return results.changedRows // either 0 (failed )or 1 (successful)
+            let changedRows = (await this.query(query, [newPassword, userId, currentPassword])).changedRows as number
+            return {changedRows} // either 0 (failed )or 1 (successful)
 
         } catch (error) {
             let error_ = error as Error
@@ -142,8 +143,8 @@ class Database{
     async UpdateProfilePicture(userId: string, urlPath: string){
         try {
             let query = `UPDATE users SET profilePicUrlPath = ? WHERE userId = ?`
-            await this.query(query,[urlPath, userId])
-            return true
+            let changedRows = (await this.query(query,[urlPath, userId])).changedRows as number
+            return {changedRows}
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.UpdateProfilePicture.name}()`)
@@ -151,6 +152,7 @@ class Database{
     }
 
     // Jobs
+
     async CreateJob(paylaod: JobDetails, userId: string) {
     try {
         const query = `
@@ -177,8 +179,8 @@ class Database{
         paylaod.applicationDeadline,
         ];
 
-        await this.query(query, values);
-        return true;
+        let changedRows = (await this.query(query, values)).changedRows as number
+        return {changedRows};
     } catch (error) {
         let error_ = error as Error
         throw DatabaseCatchError(error_, `database/${this.CreateJob.name}()`)
@@ -188,7 +190,7 @@ class Database{
     async GetSavedJobs(userId: string){
         try {
             let query = `SELECT jobTitle, type, country, city, companyName, jobDescription, jobRequirements, experience, jobId FROM userSavedJobs WHERE userId = ?`
-            let results = await this.query(query, [userId])
+            let results = (await this.query(query, [userId])) as IJobOverview[]
             return results
         } catch (error) {
             let error_ = error as Error
@@ -199,7 +201,7 @@ class Database{
     async GetCreatedJobs(userId: string, offset: Number = 0){ 
         try {
             let query = `SELECT jobTitle, type, country, city, companyName, jobDescription, jobRequirements, experience, jobId FROM jobs WHERE userId = ? LIMIT 9 OFFSET ?`
-            let results = await this.query(query, [userId, offset])
+            let results = (await this.query(query, [userId, offset])) as IJobOverview[]
             return results
         } catch (error) {
             let error_ = error as Error
@@ -209,7 +211,7 @@ class Database{
 
     async DeleteJob(userId: string, jobId: number){
         try {
-
+            // Check if the user has that job
             let query = "SELECT jobId FROM jobs WHERE jobId = ? AND userId = ?"
             let results = await this.query(query, [jobId,userId])
 
@@ -227,7 +229,7 @@ class Database{
             throw DatabaseCatchError(error_, `database/${this.DeleteJob.name}()`)
         }
     } 
-    
+
     async GetJob(jobId: string){
         try {
             let query = `SELECT * FROM jobs WHERE jobId = ?`
@@ -244,7 +246,7 @@ class Database{
             let query = `SELECT views FROM jobs WHERE jobId = ?`
             let results = await this.query(query,[jobId])
 
-            let views = results[0].views
+            let views = results[0].views as number
 
             query = "UPDATE jobs SET views = ? WHERE jobId = ?"
             await this.query(query,[views + 1,jobId])
@@ -309,7 +311,8 @@ class Database{
         try {
             let query = `SELECT jobId FROM savedJobs WHERE userId = ?`
             let results = await this.query(query,[userId])
-            let formattedResults = results.map((object: any ) => object.jobId)
+            // An array of jobIds which the user has saved
+            let formattedResults = results.map((object: any ) => object.jobId) as number[]
             return formattedResults
         } catch (error) {
             let error_ = error as Error
@@ -320,8 +323,8 @@ class Database{
     async SaveJob(userId: string, jobId: string){
         try {
             let query = `INSERT INTO savedJobs (userId, jobId) VALUES (?, ?)`
-            await this.query(query, [userId, jobId])
-            return true
+            let changedRows = (await this.query(query, [userId, jobId])).changedRows as number
+            return {changedRows}
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.SaveJob.name}()`)
@@ -331,8 +334,8 @@ class Database{
     async UnSaveJob(userId: string, jobId: string){
         try {
             let query = `DELETE FROM savedJobs WHERE userId = ? AND jobId = ?`
-            await this.query(query,[userId, jobId])
-            return true
+            let changedRows = await this.query(query,[userId, jobId]).changedRows as number
+            return {changedRows}
         } catch (error) {
             let error_ = error as Error
             throw DatabaseCatchError(error_, `database/${this.UnSaveJob.name}()`)
@@ -344,4 +347,17 @@ class Database{
 
 let db = new Database
 export default db
+
+interface IJobOverview {
+    jobTitle: string,
+    type: string,
+    country: string,
+    city: string,
+    companyName: string,
+    jobDescription: string,
+    jobRequirements: string,
+    experience: number,
+    jobId: string
+
+}
 

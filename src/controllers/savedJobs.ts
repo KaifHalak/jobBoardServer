@@ -62,7 +62,11 @@ export async function POSTSaveJob(req: CustomRequest, res: Response, next: NextF
         }
 
         // Save job to user's account only if the job exists
-        await db.SaveJob(userId, jobId)
+        let outcome = (await db.SaveJob(userId, jobId)).changedRows
+
+        if (outcome > 1){
+            throw Error("changedRows > 1")
+        }
 
         logger.events("Job saved successfully: POSTSaveJob", {userId, userIp, jobId})
 
@@ -93,7 +97,11 @@ export async function POSTUnSaveJob(req: CustomRequest, res: Response, next: Nex
 
         // Unsave job to user's account only if the job exists
 
-        await db.UnSaveJob(userId, jobId)
+        let outcome = (await db.UnSaveJob(userId, jobId)).changedRows
+
+        if (outcome > 1){
+            throw Error("changedRows > 1")
+        }
 
         logger.events("Job unsaved successfully: POSTUnSaveJob", {userId, userIp, jobId})
 

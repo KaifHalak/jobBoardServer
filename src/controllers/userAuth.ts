@@ -19,7 +19,7 @@ const SIGNUP_PAGE_PATH = path.join(__dirname, "../", "../", "../", "jobBoardClie
 
 export async function POSTLogin(req:Request, res: Response, next: NextFunction){
     
-    let userId
+    let userId: string | undefined
     let userIp = req.ip
 
     try {
@@ -49,7 +49,7 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
         }
 
 
-    userId = await db.LoginUser(email, password)
+    userId = (await db.LoginUser(email, password)).userId
     
     // If user doesn't exist
     if (!userId){
@@ -73,7 +73,7 @@ export async function POSTLogin(req:Request, res: Response, next: NextFunction){
 
 export async function POSTSignUp(req: Request, res: Response, next: NextFunction){
     
-    let userId
+    let userId: string | undefined = ""
     let userIp = req.ip!
 
    try {
@@ -107,7 +107,7 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
         return CustomError(req, res, next)(validateResult.error, HttpStatusCodes.BAD_REQUEST)
     }
 
-    userId = await db.CheckIfUserExists(email)
+    userId = (await db.CheckIfUserExists(email)).userId
 
     if (userId){
         logger.events("Account already in use: POSTSignUp", {userId, userIp, email})
@@ -116,8 +116,8 @@ export async function POSTSignUp(req: Request, res: Response, next: NextFunction
 
     // Signing user up
 
-    userId = await db.SignupUser(email, password, username) as string
-    let token = CreateToken(userId)
+    userId = (await db.SignupUser(email, password, username)).userId
+    let token = CreateToken(userId!)
 
     AddCookie(res, token)
     logger.events("User signup successfully: POSTSignUp", {userId, userIp})
